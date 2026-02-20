@@ -65,49 +65,17 @@ body {
   flex-direction: column;
   overflow: hidden;
 }
-#sidebar-toc {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0.8rem 0.6rem;
-  min-height: 0;
-}
-#sidebar-divider {
-  height: 1px;
-  background: #d1d5db;
+#sidebar-filters {
   flex-shrink: 0;
-  cursor: row-resize;
-  position: relative;
+  padding: 0.6rem 0.6rem 0.3rem;
+  border-bottom: 1px solid #e5e7eb;
 }
-#sidebar-divider::before {
-  content: '';
-  position: absolute;
-  top: -3px; left: 0; right: 0;
-  height: 7px;
-}
-#sidebar-glossary {
-  flex: 0 0 auto;
-  height: 40%;
-  overflow-y: auto;
-  padding: 0.5rem 0.6rem;
-  min-height: 60px;
-}
-#sidebar-glossary h3 {
-  font-size: 11px;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 0.4rem;
-  padding: 0 0.3rem;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.glossary-tabs {
+.filter-tabs {
   display: flex;
   gap: 2px;
-  margin-bottom: 0.4rem;
   flex-wrap: wrap;
 }
-.glossary-tab {
+.filter-tab {
   font-size: 10px;
   padding: 1px 5px;
   border: 1px solid #d1d5db;
@@ -117,26 +85,20 @@ body {
   color: #4b5563;
   line-height: 1.3;
 }
-.glossary-tab:hover { background: #f3f4f6; }
-.glossary-tab.active { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
-.glossary-item {
-  padding: 2px 0.3rem;
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 11px;
-  color: #4b5563;
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
+.filter-tab:hover { background: #f3f4f6; }
+.filter-tab.active { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+#sidebar-toc {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0.6rem;
+  min-height: 0;
 }
-.glossary-item:hover { background: #e5e7eb; color: #111; }
-.glossary-item .g-type {
-  font-size: 9px;
+#sidebar .toc-items a .type-badge {
+  font-size: 8px;
   color: #9ca3af;
-  flex-shrink: 0;
-  width: 28px;
+  margin-right: 2px;
 }
-.glossary-item .g-label { flex: 1; }
+#sidebar .toc-items li.filtered-out { display: none; }
 #sidebar-resize {
   position: absolute;
   top: 0; right: -3px;
@@ -573,6 +535,9 @@ p { margin: 0.5rem 0; }
 
 <!-- Sidebar Table of Contents — collapsible sections -->
 <nav id="sidebar">
+<div id="sidebar-filters">
+  <div class="filter-tabs" id="filter-tabs"></div>
+</div>
 <div id="sidebar-toc">
 <h2>Contents</h2>
 <ul>
@@ -744,12 +709,6 @@ p { margin: 0.5rem 0; }
   </ul>
 </li>
 </ul>
-</div>
-<div id="sidebar-divider"></div>
-<div id="sidebar-glossary">
-  <h3>Nomenclature</h3>
-  <div class="glossary-tabs" id="glossary-tabs"></div>
-  <div id="glossary-list"></div>
 </div>
 <div id="sidebar-resize"></div>
 </nav>
@@ -2474,9 +2433,13 @@ function updateMinimapScroll(id) {
 }
 
 function updateMinimapActive(id) {
-  document.querySelectorAll('#minimap-svg .minimap-node.panel-selected').forEach(function(n){n.classList.remove('panel-selected');});
+  // Clear all highlight state to avoid stale glows
+  document.querySelectorAll('#minimap-svg .minimap-node').forEach(function(n){
+    n.classList.remove('panel-selected','active','dep-highlight','usedby-highlight','dimmed');
+  });
   var node = document.querySelector('#minimap-svg .minimap-node[data-id="'+id+'"]');
   if (node) node.classList.add('panel-selected');
+  if (currentScrollId) updateMinimapScroll(currentScrollId);
 }
 
 function toggleMinimap() {
@@ -2488,72 +2451,43 @@ function toggleMinimap() {
   }
 }
 
-// ── Glossary / Nomenclature ──
-var glossaryData = {}; // type → [{id, label}]
-var glossaryFilter = 'all';
+// ── Sidebar filter tabs ──
+var activeFilter = 'all';
 
-function buildGlossary() {
+function buildFilters() {
   var types = ['definition','theorem','lemma','proposition','corollary','example','remark','notation'];
   var typeLabels = {definition:'Def',theorem:'Thm',lemma:'Lem',proposition:'Prop',corollary:'Cor',example:'Ex',remark:'Rmk',notation:'Not'};
-  glossaryData = {all:[]};
-  types.forEach(function(t){glossaryData[t]=[];});
-
-  document.querySelectorAll('.env[id]').forEach(function(env) {
-    var id = env.id, type = getType(id);
-    var label = labelMap[id] || id;
-    var entry = {id:id, type:type, label:label, shortType:typeLabels[type]||type};
-    glossaryData.all.push(entry);
-    if (glossaryData[type]) glossaryData[type].push(entry);
+  var counts = {all:0};
+  types.forEach(function(t){counts[t]=0;});
+  document.querySelectorAll('.env[id]').forEach(function(env){
+    counts.all++; var t=getType(env.id); if(counts[t]!==undefined) counts[t]++;
   });
-
-  // Build tabs
-  var tabsEl = document.getElementById('glossary-tabs');
-  var tabs = [{key:'all',label:'All ('+glossaryData.all.length+')'}];
-  types.forEach(function(t){
-    if(glossaryData[t].length>0) tabs.push({key:t,label:typeLabels[t]+' ('+glossaryData[t].length+')'});
-  });
-  var tabsHtml = '';
-  tabs.forEach(function(t){
-    tabsHtml += '<button class="glossary-tab'+(t.key==='all'?' active':'')+'" data-filter="'+t.key+'">'+t.label+'</button>';
-  });
-  tabsEl.innerHTML = tabsHtml;
-
-  // Tab click handlers
-  tabsEl.querySelectorAll('.glossary-tab').forEach(function(tab){
+  var tabsEl = document.getElementById('filter-tabs');
+  var html = '<button class="filter-tab active" data-filter="all">All</button>';
+  types.forEach(function(t){ if(counts[t]>0) html+='<button class="filter-tab" data-filter="'+t+'">'+typeLabels[t]+'</button>'; });
+  tabsEl.innerHTML = html;
+  tabsEl.querySelectorAll('.filter-tab').forEach(function(tab){
     tab.addEventListener('click',function(){
-      tabsEl.querySelectorAll('.glossary-tab').forEach(function(t){t.classList.remove('active');});
+      tabsEl.querySelectorAll('.filter-tab').forEach(function(t){t.classList.remove('active');});
       tab.classList.add('active');
-      glossaryFilter = tab.getAttribute('data-filter');
-      renderGlossaryList();
+      activeFilter = tab.getAttribute('data-filter');
+      applyFilter();
     });
   });
-
-  renderGlossaryList();
+  // Add peek on hover to TOC items
+  document.querySelectorAll('.toc-items a[data-id]').forEach(function(a){
+    a.addEventListener('mouseenter',function(){ var id=a.getAttribute('data-id'); if(id) showPeek(id, a); });
+    a.addEventListener('mouseleave',function(){ hidePeek(); });
+  });
 }
 
-function renderGlossaryList() {
-  var list = document.getElementById('glossary-list');
-  var items = glossaryData[glossaryFilter] || glossaryData.all;
-  var html = '';
-  items.forEach(function(entry) {
-    html += '<div class="glossary-item" data-id="'+entry.id+'" data-ref="'+entry.id+'">';
-    html += '<span class="g-type">'+esc(entry.shortType)+'</span>';
-    html += '<span class="g-label">'+esc(entry.label)+'</span>';
-    html += '</div>';
-  });
-  list.innerHTML = html;
-
-  // Click → scroll + navigate, Hover → peek
-  list.querySelectorAll('.glossary-item').forEach(function(item){
-    item.addEventListener('click',function(){
-      var id = item.getAttribute('data-id');
-      if(id){scrollToEnv(id); if(graph[id]) navigateTo(id);}
-    });
-    item.addEventListener('mouseenter',function(){
-      var id = item.getAttribute('data-id');
-      if(id) showPeek(id, item);
-    });
-    item.addEventListener('mouseleave',function(){ hidePeek(); });
+function applyFilter() {
+  document.querySelectorAll('.toc-items li').forEach(function(li){
+    var a = li.querySelector('a[data-id]');
+    if (!a) return;
+    var id = a.getAttribute('data-id'), type = getType(id);
+    if (activeFilter==='all' || type===activeFilter) li.classList.remove('filtered-out');
+    else li.classList.add('filtered-out');
   });
 }
 
@@ -2622,7 +2556,7 @@ function initApp() {
   buildGraph();
   renderMinimap();
   document.getElementById('btn-map').classList.add('active');
-  buildGlossary();
+  buildFilters();
   setupScrollObserver();
   initResize();
   initPeek();
