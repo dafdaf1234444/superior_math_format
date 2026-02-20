@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B2.1 Introduction to Representation Theory — Konstantin Ardakov</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['\\(','\\)']],
+    displayMath: [['\\[','\\]']],
+    macros: {
+      Hom: '\\operatorname{Hom}',
+      End: '\\operatorname{End}',
+      GL: '\\operatorname{GL}',
+      Ind: '\\operatorname{Ind}',
+      Res: '\\operatorname{Res}',
+      tr: '\\operatorname{tr}',
+      ker: '\\operatorname{ker}',
+      Im: '\\operatorname{Im}',
+      ann: '\\operatorname{ann}',
+      Fix: '\\operatorname{Fix}',
+      Norm: '\\operatorname{Norm}',
+      rank: '\\operatorname{rk}'
+    }
+  },
+  startup: {
+    pageReady: function() {
+      return MathJax.startup.defaultPageReady().then(function() {
+        initApp();
+      });
+    }
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+@import url('https://cdn.jsdelivr.net/npm/computer-modern/cmsans.css');
+@import url('https://cdn.jsdelivr.net/npm/computer-modern/cmserif.css');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Computer Modern Serif", Georgia, serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #111;
+  background: #fff;
+  display: grid;
+  grid-template-columns: var(--sidebar-width, 200px) 1fr var(--panel-width, 450px);
+  grid-template-rows: 100vh;
+  overflow: hidden;
+}
+
+/* ── Left Sidebar ── */
+#sidebar {
+  grid-column: 1;
+  height: 100vh;
+  border-right: 1px solid #d1d5db;
+  font-size: 12px;
+  line-height: 1.35;
+  background: #fff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#sidebar-toc {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.8rem 0.6rem;
+  min-height: 0;
+}
+#sidebar-divider {
+  height: 1px;
+  background: #d1d5db;
+  flex-shrink: 0;
+  cursor: row-resize;
+  position: relative;
+}
+#sidebar-divider::before {
+  content: '';
+  position: absolute;
+  top: -3px; left: 0; right: 0;
+  height: 7px;
+}
+#sidebar-glossary {
+  flex: 0 0 auto;
+  height: 40%;
+  overflow-y: auto;
+  padding: 0.5rem 0.6rem;
+  min-height: 60px;
+}
+#sidebar-glossary h3 {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.4rem;
+  padding: 0 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.glossary-tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+}
+.glossary-tab {
+  font-size: 10px;
+  padding: 1px 5px;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  background: #fff;
+  cursor: pointer;
+  color: #4b5563;
+  line-height: 1.3;
+}
+.glossary-tab:hover { background: #f3f4f6; }
+.glossary-tab.active { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+.glossary-item {
+  padding: 2px 0.3rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #4b5563;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.glossary-item:hover { background: #e5e7eb; color: #111; }
+.glossary-item .g-type {
+  font-size: 9px;
+  color: #9ca3af;
+  flex-shrink: 0;
+  width: 28px;
+}
+.glossary-item .g-label { flex: 1; }
+#sidebar-resize {
+  position: absolute;
+  top: 0; right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 20;
+  background: transparent;
+}
+#sidebar-resize:hover, #sidebar-resize.dragging { background: rgba(30,64,175,0.2); }
+#sidebar h2 {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  padding: 0 0.3rem;
+  color: #333;
+}
+#sidebar ul { list-style: none; }
+#sidebar .toc-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  cursor: pointer;
+  font-weight: 600;
+  color: #1f2937;
+  padding: 3px 0.3rem;
+  user-select: none;
+  border-radius: 3px;
+  margin-top: 0.4rem;
+}
+#sidebar .toc-section-head:hover { background: #f3f4f6; }
+#sidebar .toc-section-head .arrow {
+  display: inline-block;
+  font-size: 9px;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+  width: 10px;
+}
+#sidebar .toc-section-head.expanded .arrow { transform: rotate(90deg); }
+#sidebar .toc-items {
+  display: none;
+  padding-left: 0.9rem;
+}
+#sidebar .toc-items.visible { display: block; }
+#sidebar .toc-items li { margin: 1px 0; }
+#sidebar .toc-items a {
+  color: #4b5563;
+  text-decoration: none;
+  display: block;
+  padding: 1px 0.3rem;
+  border-radius: 3px;
+  font-size: 11.5px;
+}
+#sidebar .toc-items a:hover { background: #e5e7eb; color: #111; }
+#sidebar .toc-items a.active {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+/* ── Center Content ── */
+#content {
+  grid-column: 2;
+  height: 100vh;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  padding: 2.5rem 2.5rem 6rem;
+  max-width: none;
+}
+
+/* Title */
+.doc-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.2rem;
+}
+.doc-author {
+  font-size: 1.1rem;
+  text-align: center;
+  color: #555;
+  margin-bottom: 2.5rem;
+}
+
+/* Section headings */
+h2.section-heading {
+  font-size: 1.3em;
+  font-weight: 700;
+  margin: 2.5rem 0 1rem;
+}
+
+/* Theorem-like environments — monochrome LaTeX style */
+.env {
+  margin: 1.2rem 0;
+  padding: 0.5rem 0 0.5rem 1rem;
+  border-left: 2px solid #d1d5db;
+  background: transparent;
+  border-radius: 0;
+}
+.env-head {
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 0.1rem;
+  cursor: pointer;
+}
+.env-head:hover { color: #1e40af; }
+.env-name { font-style: italic; font-weight: 400; }
+
+/* Remove all type-specific coloring */
+.env.definition, .env.theorem, .env.lemma, .env.proposition,
+.env.corollary, .env.example, .env.remark, .env.notation, .env.warning {
+  border-color: #d1d5db;
+  background: transparent;
+}
+.env.definition .env-head, .env.theorem .env-head, .env.lemma .env-head,
+.env.proposition .env-head, .env.corollary .env-head, .env.example .env-head,
+.env.remark .env-head, .env.notation .env-head, .env.warning .env-head {
+  color: #111;
+}
+
+/* Highlight selected env */
+.env.panel-active {
+  background: #f8fafc;
+  border-left-color: #1e40af;
+  border-left-width: 3px;
+}
+
+/* Proofs */
+.proof {
+  margin: 0.5rem 0 1.2rem;
+  padding: 0.4rem 0 0.4rem 1rem;
+  border-left: none;
+  cursor: pointer;
+  position: relative;
+}
+.proof-head {
+  font-style: italic;
+  font-weight: 400;
+  color: #111;
+  user-select: none;
+}
+.proof-head::after {
+  content: ' ▾';
+  font-size: 0.7em;
+  color: #9ca3af;
+}
+.proof.collapsed .proof-head::after { content: ' ▸'; }
+.proof.collapsed .proof-body { display: none; }
+.proof-body { margin-top: 0.3rem; }
+.qed {
+  text-align: right;
+  font-size: 1em;
+  margin-top: 0.1rem;
+}
+
+/* Cross-references — dark blue, no underline */
+a.ref {
+  color: #1e40af;
+  text-decoration: none;
+  border-bottom: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+a.ref:hover { color: #1d4ed8; background: #eff6ff; border-radius: 2px; }
+
+/* Character tables — booktabs style */
+table.char-table {
+  border-collapse: collapse;
+  margin: 1rem auto;
+  font-size: 15px;
+}
+table.char-table th, table.char-table td {
+  border: none;
+  padding: 3px 12px;
+  text-align: center;
+}
+table.char-table { border-top: 2px solid #111; border-bottom: 2px solid #111; }
+table.char-table th {
+  background: transparent;
+  font-weight: 600;
+  border-bottom: 1px solid #111;
+}
+
+/* ── Right Panel ── */
+#ref-panel {
+  grid-column: 3;
+  height: 100vh;
+  border-left: 1px solid #d1d5db;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  overflow: hidden;
+  position: relative;
+}
+#ref-panel .panel-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #9ca3af;
+  font-size: 14px;
+  font-style: italic;
+  padding: 1rem;
+  text-align: center;
+}
+
+/* Resize handle */
+#resize-handle {
+  position: absolute;
+  top: 0; left: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 20;
+  background: transparent;
+}
+#resize-handle:hover, #resize-handle.dragging { background: rgba(30,64,175,0.2); }
+
+/* Nav bar */
+#panel-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 12px;
+  flex-shrink: 0;
+  min-height: 32px;
+}
+#panel-nav button {
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 6px;
+  color: #4b5563;
+  line-height: 1;
+}
+#panel-nav button:hover:not(:disabled) { background: #f3f4f6; color: #111; }
+#panel-nav button:disabled { opacity: 0.3; cursor: default; }
+#panel-nav .nav-label {
+  flex: 1;
+  font-weight: 600;
+  color: #1f2937;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: 4px;
+}
+
+/* Graph container */
+#graph-container {
+  flex-shrink: 0;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.6rem;
+  min-height: 100px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+#graph-container svg { display: block; margin: 0 auto; }
+
+/* Panel content area */
+#panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  position: relative;
+}
+
+/* Section labels in panel content */
+.panel-section {
+  padding: 0.4rem 0.8rem 0;
+}
+.panel-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.panel-section-controls {
+  display: inline-flex; gap: 6px; margin-left: auto; font-weight: 400;
+}
+.panel-section-controls button {
+  background: none; border: none; cursor: pointer;
+  font-size: 10px; color: #6b7280; text-decoration: underline;
+  text-transform: none; letter-spacing: 0;
+}
+.panel-section-controls button:hover { color: #1e40af; }
+.panel-section .stacked-item {
+  margin-bottom: 0.6rem;
+  padding: 0 0 0.6rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.panel-section .stacked-item:last-child { border-bottom: none; }
+.stacked-header {
+  font-weight: 700;
+  font-size: 12.5px;
+  color: #1e40af;
+  cursor: pointer;
+  margin-bottom: 0.2rem;
+  padding: 0 0.8rem 0 1.6rem;
+  position: relative;
+}
+.stacked-header:hover { text-decoration: underline; }
+.stacked-header .toggle-icon {
+  position: absolute; left: 0.5rem; top: 1px;
+  font-size: 9px; color: #6b7280;
+  transition: transform 0.15s;
+}
+.stacked-item.expanded .toggle-icon { transform: rotate(90deg); }
+.stacked-body {
+  font-size: 13.5px;
+  line-height: 1.4;
+  padding: 0 0.8rem;
+  display: none;
+}
+.stacked-item.expanded .stacked-body { display: block; }
+.stacked-body .env {
+  margin: 0;
+  padding: 0.2rem 0 0.2rem 0.6rem;
+  border-left: 2px solid #d1d5db;
+  font-size: 13.5px;
+}
+.panel-section-empty {
+  color: #9ca3af;
+  font-size: 12px;
+  font-style: italic;
+  padding: 0.3rem 0.8rem;
+}
+
+/* Floating peek popover — appears near hovered reference */
+#peek-popover {
+  position: fixed;
+  width: 380px;
+  max-height: 420px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  display: none;
+  flex-direction: column;
+  z-index: 100;
+  font-size: 14px;
+}
+#peek-popover.visible { display: flex; }
+#peek-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e40af;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 6px 6px 0 0;
+  flex-shrink: 0;
+}
+#peek-popover-header button {
+  background: none; border: none; cursor: pointer;
+  font-size: 14px; color: #6b7280; padding: 0 2px;
+}
+#peek-popover-header button:hover { color: #111; }
+#peek-popover-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0.8rem;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+#peek-popover-body .env {
+  margin: 0;
+  padding: 0.2rem 0 0.2rem 0.6rem;
+  border-left: 2px solid #d1d5db;
+  font-size: 13.5px;
+}
+
+/* Minimap overview */
+#minimap-container {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 6px 8px;
+  overflow-x: auto; overflow-y: hidden;
+  flex-shrink: 0;
+  position: relative;
+}
+#minimap-container.hidden { display: none; }
+.minimap-node { cursor: pointer; }
+.minimap-node rect { transition: opacity 0.15s, filter 0.15s; }
+.minimap-node.dimmed rect { opacity: 0.12; }
+.minimap-node.scroll-active rect { stroke: #111; stroke-width: 2; }
+.minimap-node.active rect { stroke: #1e40af; stroke-width: 2.5; filter: drop-shadow(0 0 3px rgba(30,64,175,0.5)); }
+.minimap-node.dep-highlight rect { stroke: #2563eb; stroke-width: 2; filter: drop-shadow(0 0 2px rgba(37,99,235,0.6)); }
+.minimap-node.usedby-highlight rect { stroke: #dc2626; stroke-width: 2; filter: drop-shadow(0 0 2px rgba(220,38,38,0.6)); }
+.minimap-node.panel-selected rect { stroke: #1e40af; stroke-width: 2; }
+#nav-label.minimap-hover { color: #6b7280; font-style: italic; }
+.minimap-legend {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 4px 0 2px; font-size: 9px; color: #6b7280;
+}
+.minimap-legend span::before {
+  content: ''; display: inline-block;
+  width: 8px; height: 8px; border-radius: 1px;
+  margin-right: 2px; vertical-align: middle;
+}
+
+/* Map toggle button */
+#panel-nav .btn-map { margin-left: auto; font-size: 10px; }
+#panel-nav .btn-map.active { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+
+/* Close panel button */
+#panel-nav .btn-close-panel { font-size: 13px; padding: 1px 5px; }
+
+/* Graph node styling */
+.graph-node { cursor: pointer; }
+.graph-node rect { rx: 4; ry: 4; }
+.graph-node:hover rect { filter: brightness(0.92); }
+.graph-node text { font-family: "Computer Modern Serif", Georgia, serif; font-size: 10.5px; }
+.graph-label { font-family: "Computer Modern Serif", Georgia, serif; }
+
+p { margin: 0.5rem 0; }
+.display-math { margin: 0.8rem 0; text-align: center; }
+.important-convention { background: #fefce8; border: 1px solid #fbbf24; border-radius: 0; padding: 0.8rem 1rem; margin: 1rem 0; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar Table of Contents — collapsible sections -->
+<nav id="sidebar">
+<div id="sidebar-toc">
+<h2>Contents</h2>
+<ul>
+<li>
+  <div class="toc-section-head" data-section="sec1"><span class="arrow">&#9656;</span> 1. Representations</div>
+  <ul class="toc-items" data-section="sec1">
+    <li><a href="#not-1.1" data-id="not-1.1">Not. 1.1</a></li>
+    <li><a href="#def-1.2" data-id="def-1.2">Def. 1.2</a></li>
+    <li><a href="#ex-1.3" data-id="ex-1.3">Ex. 1.3</a></li>
+    <li><a href="#def-1.4" data-id="def-1.4">Def. 1.4</a></li>
+    <li><a href="#def-1.5" data-id="def-1.5">Def. 1.5</a></li>
+    <li><a href="#ex-1.6" data-id="ex-1.6">Ex. 1.6</a></li>
+    <li><a href="#def-1.7" data-id="def-1.7">Def. 1.7</a></li>
+    <li><a href="#def-1.8" data-id="def-1.8">Def. 1.8</a></li>
+    <li><a href="#def-1.9" data-id="def-1.9">Def. 1.9</a></li>
+    <li><a href="#rmk-1.10" data-id="rmk-1.10">Rmk. 1.10</a></li>
+    <li><a href="#ex-1.11" data-id="ex-1.11">Ex. 1.11</a></li>
+    <li><a href="#def-1.12" data-id="def-1.12">Def. 1.12</a></li>
+    <li><a href="#def-1.13" data-id="def-1.13">Def. 1.13</a></li>
+    <li><a href="#def-1.14" data-id="def-1.14">Def. 1.14</a></li>
+    <li><a href="#lem-1.15" data-id="lem-1.15">Lem. 1.15</a></li>
+    <li><a href="#def-1.16" data-id="def-1.16">Def. 1.16</a></li>
+    <li><a href="#ex-1.17" data-id="ex-1.17">Ex. 1.17</a></li>
+    <li><a href="#def-1.18" data-id="def-1.18">Def. 1.18</a></li>
+    <li><a href="#def-1.19" data-id="def-1.19">Def. 1.19</a></li>
+    <li><a href="#ex-1.20" data-id="ex-1.20">Ex. 1.20</a></li>
+    <li><a href="#thm-1.21" data-id="thm-1.21">Thm. 1.21 (Maschke)</a></li>
+    <li><a href="#rmk-1.22" data-id="rmk-1.22">Rmk. 1.22</a></li>
+    <li><a href="#def-1.23" data-id="def-1.23">Def. 1.23</a></li>
+    <li><a href="#cor-1.24" data-id="cor-1.24">Cor. 1.24</a></li>
+  </ul>
+</li>
+<li>
+  <div class="toc-section-head" data-section="sec2"><span class="arrow">&#9656;</span> 2. Group ring</div>
+  <ul class="toc-items" data-section="sec2">
+    <li><a href="#def-2.1" data-id="def-2.1">Def. 2.1</a></li>
+    <li><a href="#def-2.2" data-id="def-2.2">Def. 2.2</a></li>
+    <li><a href="#ex-2.3" data-id="ex-2.3">Ex. 2.3</a></li>
+    <li><a href="#def-2.4" data-id="def-2.4">Def. 2.4</a></li>
+    <li><a href="#prop-2.5" data-id="prop-2.5">Prop. 2.5</a></li>
+    <li><a href="#rmk-2.6" data-id="rmk-2.6">Rmk. 2.6</a></li>
+    <li><a href="#ex-2.7" data-id="ex-2.7">Ex. 2.7</a></li>
+    <li><a href="#def-2.8" data-id="def-2.8">Def. 2.8</a></li>
+    <li><a href="#def-2.9" data-id="def-2.9">Def. 2.9</a></li>
+    <li><a href="#ex-2.10" data-id="ex-2.10">Ex. 2.10</a></li>
+    <li><a href="#def-2.11" data-id="def-2.11">Def. 2.11</a></li>
+    <li><a href="#lem-2.12" data-id="lem-2.12">Lem. 2.12</a></li>
+    <li><a href="#lem-2.13" data-id="lem-2.13">Lem. 2.13</a></li>
+    <li><a href="#prop-2.14" data-id="prop-2.14">Prop. 2.14</a></li>
+    <li><a href="#thm-2.15" data-id="thm-2.15">Thm. 2.15</a></li>
+    <li><a href="#def-2.16" data-id="def-2.16">Def. 2.16</a></li>
+  </ul>
+</li>
+<li>
+  <div class="toc-section-head" data-section="sec3"><span class="arrow">&#9656;</span> 3. Semisimple algebras</div>
+  <ul class="toc-items" data-section="sec3">
+    <li><a href="#def-3.1" data-id="def-3.1">Def. 3.1</a></li>
+    <li><a href="#def-3.2" data-id="def-3.2">Def. 3.2</a></li>
+    <li><a href="#def-3.3" data-id="def-3.3">Def. 3.3</a></li>
+    <li><a href="#thm-3.4" data-id="thm-3.4">Thm. 3.4 (Schur)</a></li>
+    <li><a href="#def-3.5" data-id="def-3.5">Def. 3.5</a></li>
+    <li><a href="#not-3.6" data-id="not-3.6">Not. 3.6</a></li>
+    <li><a href="#prop-3.7" data-id="prop-3.7">Prop. 3.7</a></li>
+    <li><a href="#lem-3.8" data-id="lem-3.8">Lem. 3.8</a></li>
+    <li><a href="#lem-3.9" data-id="lem-3.9">Lem. 3.9</a></li>
+    <li><a href="#thm-3.10" data-id="thm-3.10">Thm. 3.10</a></li>
+    <li><a href="#def-3.11" data-id="def-3.11">Def. 3.11</a></li>
+    <li><a href="#prop-3.12" data-id="prop-3.12">Prop. 3.12</a></li>
+    <li><a href="#cor-3.13" data-id="cor-3.13">Cor. 3.13</a></li>
+    <li><a href="#lem-3.14" data-id="lem-3.14">Lem. 3.14</a></li>
+    <li><a href="#def-3.15" data-id="def-3.15">Def. 3.15</a></li>
+    <li><a href="#prop-3.16" data-id="prop-3.16">Prop. 3.16</a></li>
+    <li><a href="#thm-3.17" data-id="thm-3.17">Thm. 3.17 (Artin-Wedderburn)</a></li>
+    <li><a href="#cor-3.18" data-id="cor-3.18">Cor. 3.18</a></li>
+  </ul>
+</li>
+<li>
+  <div class="toc-section-head" data-section="sec4"><span class="arrow">&#9656;</span> 4. Multilinear algebra</div>
+  <ul class="toc-items" data-section="sec4">
+    <li><a href="#lem-4.1" data-id="lem-4.1">Lem. 4.1</a></li>
+    <li><a href="#def-4.2" data-id="def-4.2">Def. 4.2</a></li>
+    <li><a href="#def-4.3" data-id="def-4.3">Def. 4.3</a></li>
+    <li><a href="#def-4.4" data-id="def-4.4">Def. 4.4</a></li>
+    <li><a href="#lem-4.5" data-id="lem-4.5">Lem. 4.5</a></li>
+    <li><a href="#def-4.6" data-id="def-4.6">Def. 4.6</a></li>
+    <li><a href="#rmk-4.7" data-id="rmk-4.7">Rmk. 4.7</a></li>
+    <li><a href="#lem-4.8" data-id="lem-4.8">Lem. 4.8</a></li>
+    <li><a href="#lem-4.9" data-id="lem-4.9">Lem. 4.9</a></li>
+    <li><a href="#def-4.10" data-id="def-4.10">Def. 4.10</a></li>
+    <li><a href="#lem-4.11" data-id="lem-4.11">Lem. 4.11</a></li>
+    <li><a href="#def-4.12" data-id="def-4.12">Def. 4.12</a></li>
+    <li><a href="#lem-4.13" data-id="lem-4.13">Lem. 4.13</a></li>
+  </ul>
+</li>
+<li>
+  <div class="toc-section-head" data-section="sec5"><span class="arrow">&#9656;</span> 5. Character theory</div>
+  <ul class="toc-items" data-section="sec5">
+    <li><a href="#def-5.1" data-id="def-5.1">Def. 5.1</a></li>
+    <li><a href="#def-5.2" data-id="def-5.2">Def. 5.2</a></li>
+    <li><a href="#lem-5.3" data-id="lem-5.3">Lem. 5.3</a></li>
+    <li><a href="#def-5.4" data-id="def-5.4">Def. 5.4</a></li>
+    <li><a href="#lem-5.5" data-id="lem-5.5">Lem. 5.5</a></li>
+    <li><a href="#ex-5.6" data-id="ex-5.6">Ex. 5.6</a></li>
+    <li><a href="#prop-5.7" data-id="prop-5.7">Prop. 5.7</a></li>
+    <li><a href="#def-5.8" data-id="def-5.8">Def. 5.8</a></li>
+    <li><a href="#def-5.9" data-id="def-5.9">Def. 5.9</a></li>
+    <li><a href="#lem-5.10" data-id="lem-5.10">Lem. 5.10</a></li>
+    <li><a href="#ex-5.11" data-id="ex-5.11">Ex. 5.11</a></li>
+    <li><a href="#def-5.12" data-id="def-5.12">Def. 5.12</a></li>
+    <li><a href="#thm-5.13" data-id="thm-5.13">Thm. 5.13 (Row Orth.)</a></li>
+    <li><a href="#cor-5.14" data-id="cor-5.14">Cor. 5.14</a></li>
+    <li><a href="#cor-5.15" data-id="cor-5.15">Cor. 5.15</a></li>
+    <li><a href="#def-5.16" data-id="def-5.16">Def. 5.16</a></li>
+    <li><a href="#lem-5.17" data-id="lem-5.17">Lem. 5.17</a></li>
+    <li><a href="#ex-5.18" data-id="ex-5.18">Ex. 5.18</a></li>
+    <li><a href="#def-5.19" data-id="def-5.19">Def. 5.19</a></li>
+    <li><a href="#prop-5.20" data-id="prop-5.20">Prop. 5.20</a></li>
+    <li><a href="#prop-5.21" data-id="prop-5.21">Prop. 5.21</a></li>
+    <li><a href="#prop-5.22" data-id="prop-5.22">Prop. 5.22</a></li>
+    <li><a href="#thm-5.23" data-id="thm-5.23">Thm. 5.23 (Col. Orth.)</a></li>
+    <li><a href="#ex-5.24" data-id="ex-5.24">Ex. 5.24</a></li>
+  </ul>
+</li>
+<li>
+  <div class="toc-section-head" data-section="sec6"><span class="arrow">&#9656;</span> 6. Induced reps</div>
+  <ul class="toc-items" data-section="sec6">
+    <li><a href="#def-6.1" data-id="def-6.1">Def. 6.1</a></li>
+    <li><a href="#lem-6.2" data-id="lem-6.2">Lem. 6.2</a></li>
+    <li><a href="#cor-6.3" data-id="cor-6.3">Cor. 6.3</a></li>
+    <li><a href="#def-6.4" data-id="def-6.4">Def. 6.4</a></li>
+    <li><a href="#lem-6.5" data-id="lem-6.5">Lem. 6.5</a></li>
+    <li><a href="#lem-6.6" data-id="lem-6.6">Lem. 6.6</a></li>
+    <li><a href="#prop-6.7" data-id="prop-6.7">Prop. 6.7</a></li>
+    <li><a href="#ex-6.8" data-id="ex-6.8">Ex. 6.8</a></li>
+    <li><a href="#def-6.9" data-id="def-6.9">Def. 6.9</a></li>
+    <li><a href="#prop-6.10" data-id="prop-6.10">Prop. 6.10</a></li>
+    <li><a href="#def-6.11" data-id="def-6.11">Def. 6.11</a></li>
+    <li><a href="#cor-6.12" data-id="cor-6.12">Cor. 6.12 (Frob. Rec.)</a></li>
+    <li><a href="#ex-6.13" data-id="ex-6.13">Ex. 6.13</a></li>
+    <li><a href="#lem-6.14" data-id="lem-6.14">Lem. 6.14</a></li>
+    <li><a href="#def-6.15" data-id="def-6.15">Def. 6.15</a></li>
+    <li><a href="#thm-6.16" data-id="thm-6.16">Thm. 6.16</a></li>
+    <li><a href="#rmk-6.17" data-id="rmk-6.17">Rmk. 6.17</a></li>
+    <li><a href="#cor-6.18" data-id="cor-6.18">Cor. 6.18</a></li>
+    <li><a href="#cor-6.19" data-id="cor-6.19">Cor. 6.19</a></li>
+    <li><a href="#def-6.20" data-id="def-6.20">Def. 6.20</a></li>
+    <li><a href="#prop-6.21" data-id="prop-6.21">Prop. 6.21</a></li>
+    <li><a href="#cor-6.22" data-id="cor-6.22">Cor. 6.22</a></li>
+    <li><a href="#ex-6.23" data-id="ex-6.23">Ex. 6.23</a></li>
+  </ul>
+</li>
+<li>
+  <div class="toc-section-head" data-section="sec7"><span class="arrow">&#9656;</span> 7. Burnside's thm</div>
+  <ul class="toc-items" data-section="sec7">
+    <li><a href="#def-7.1" data-id="def-7.1">Def. 7.1</a></li>
+    <li><a href="#ex-7.2" data-id="ex-7.2">Ex. 7.2</a></li>
+    <li><a href="#thm-7.3" data-id="thm-7.3">Thm. 7.3</a></li>
+    <li><a href="#prop-7.4" data-id="prop-7.4">Prop. 7.4</a></li>
+    <li><a href="#lem-7.5" data-id="lem-7.5">Lem. 7.5</a></li>
+    <li><a href="#lem-7.6" data-id="lem-7.6">Lem. 7.6</a></li>
+    <li><a href="#thm-7.7" data-id="thm-7.7">Thm. 7.7</a></li>
+    <li><a href="#cor-7.8" data-id="cor-7.8">Cor. 7.8</a></li>
+    <li><a href="#thm-7.9" data-id="thm-7.9">Thm. 7.9 (Burnside)</a></li>
+    <li><a href="#def-7.10" data-id="def-7.10">Def. 7.10</a></li>
+    <li><a href="#thm-7.11" data-id="thm-7.11">Thm. 7.11 (Sylow)</a></li>
+    <li><a href="#lem-7.12" data-id="lem-7.12">Lem. 7.12</a></li>
+    <li><a href="#thm-7.13" data-id="thm-7.13">Thm. 7.13</a></li>
+    <li><a href="#lem-7.14" data-id="lem-7.14">Lem. 7.14</a></li>
+  </ul>
+</li>
+</ul>
+</div>
+<div id="sidebar-divider"></div>
+<div id="sidebar-glossary">
+  <h3>Nomenclature</h3>
+  <div class="glossary-tabs" id="glossary-tabs"></div>
+  <div id="glossary-list"></div>
+</div>
+<div id="sidebar-resize"></div>
+</nav>
+
+<main id="content">
+<div class="doc-title">Introduction to Representation Theory</div>
+<div class="doc-author">Konstantin Ardakov</div>
+
+<!-- ==================== SECTION 1 ==================== -->
+<h2 class="section-heading" id="sec1">1. Representations of finite groups</h2>
+
+<p>Group representation theory is a marriage of Group Theory and Linear Algebra. Its aim is to study all the ways in which a given group can arise as a group of symmetries of some vector space.</p>
+
+<div class="env notation" id="not-1.1">
+<div class="env-head">Notation 1.1.</div>
+Throughout this course, \(k\) will denote a field, and all vector spaces are understood to be \(k\)-vector spaces. Recall that the general linear group of a \(k\)-vector space \(V\) is the group \(\GL(V)\) of invertible \(k\)-linear transformations \(V \to V\) with the operation of composition.
+</div>
+
+<div class="env definition" id="def-1.2">
+<div class="env-head">Definition 1.2.</div>
+Let \(G\) be a finite group and let \(V\) be a finite dimensional vector space over \(k\). A <b>representation</b> of \(G\) on \(V\) is a group homomorphism \[\rho : G \to \GL(V).\] The <b>degree</b> of the representation is \(\dim V\).
+</div>
+
+<p>If we need to be more precise about the ground field of scalars, we will say "\(\rho\) is a \(k\)-representation of \(G\)". Here are some examples from Geometry.</p>
+
+<div class="env example" id="ex-1.3">
+<div class="env-head">Example 1.3.</div>
+<p>(a) The cyclic group \(G = \langle g \rangle\) of order 2 acts on \(V = k\) by negation: \(\rho(g) = -1\) gives a representation of \(G\) of degree 1.</p>
+<p>(b) Let \(G\) be the symmetry group of a triangle: \(G = D_6 = \{e, r, r^2, s, sr, sr^2\}\) and let \(k = \mathbb{R}\). Then \(G\) acts by \(\mathbb{R}\)-linear transformations on the plane \(V = \mathbb{R}^2\). This gives rise to a representation \(\rho : G \to \GL(V)\) where \(\rho(r)\) is the rotation through \(2\pi/3\) and \(\rho(s)\) is the reflection in the \(y\)-axis.</p>
+<p>(c) The symmetry group of the regular \(n\)-gon \(G = D_{2n}\) acts on \(V = \mathbb{R}^2\) by \(\mathbb{R}\)-linear transformations, giving a natural representation of \(G\) of degree 2.</p>
+<p>(d) Let \(k = \mathbb{R}\), let \(X \subset \mathbb{R}^3\) be the set of vertices of a cube centred at the origin, and let \(G\) be the stabiliser of \(X\) in the rotation group \(\operatorname{SO}_3(\mathbb{R})\). Then from your Prelims M1 course you know that \(G\) is isomorphic to the symmetric group \(S_4\). In this way, we obtain a degree 3 representation \(\rho : S_4 \to \GL(\mathbb{R}^3)\) of this symmetric group.</p>
+</div>
+
+<p>One may view representations as a "linearisation" of the notion of a group action on a set. This gives a large class of examples of representations, as follows.</p>
+
+<div class="env definition" id="def-1.4">
+<div class="env-head">Definition 1.4.</div>
+Let \(X\) be a finite set. The <b>free vector space</b> on \(X\) is the set \[kX := \left\{ \sum_{x \in X} a_x\, x : a_x \in k \right\}\] of formal linear combinations of members of \(X\) with coefficients \(a_x\) lying in \(k\). The addition and scalar multiplication operations on \(kX\) are the evident ones.
+</div>
+
+<p>Note that \(X\) is naturally a basis for \(kX\).</p>
+
+<div class="env definition" id="def-1.5">
+<div class="env-head">Definition 1.5.</div>
+Let \(X\) be a finite set equipped with a left action of the finite group \(G\). Each \(g \in G\) defines a permutation \(\rho(g) : X \to X\), given by \(\rho(g)(x) = g \cdot x\). This permutation extends uniquely to an invertible linear map \(\rho(g) : kX \to kX\): \[\rho(g)\!\left(\sum_{x \in X} a_x x\right) = \sum_{x \in X} a_x\, g \cdot x.\] Since \(g \cdot (h \cdot x) = (gh) \cdot x\) for all \(g, h \in G\) and all \(x \in X\) one checks easily that \(\rho(g)\rho(h) = \rho(gh)\) in \(\GL(kX)\) for all \(g, h \in G\). Thus \(\rho : G \to \GL(kX)\) is a representation, called the <b>permutation representation</b> (associated with \(X\)).
+</div>
+
+<p>Here is an example from Galois Theory.</p>
+
+<div class="env example" id="ex-1.6">
+<div class="env-head">Example 1.6.</div>
+Let \(k = \mathbb{Q}\) be the field of rational numbers and let \(F\) be a finite field extension of \(k\) (so that \(\dim_k F < \infty\)). Let \(G\) be the group of all field automorphisms of \(F\). Then every \(g \in G\) is a \(k\)-linear map \(g : F \to F\), and one of the main results of Galois Theory tells us that \(G\) is a finite group. Then the inclusion \(G \hookrightarrow \GL(F)\) gives a \(k\)-linear representation of \(G\) of degree \(\dim_k F\).
+<p>For example, \(F\) could be the splitting field \(\mathbb{Q}(\sqrt[3]{2}, e^{2\pi i/3})\) of the polynomial \(x^3 - 2\). Then \(G\) is the symmetric group \(S_3\) and this gives a \(\mathbb{Q}\)-linear representation \(\rho : S_3 \to \GL(F)\) of degree 6.</p>
+<p>The study of representations of Galois groups forms a major part of modern Algebraic Number Theory, for example through the Langlands Programme.</p>
+</div>
+
+<div class="env definition" id="def-1.7">
+<div class="env-head">Definition 1.7.</div>
+The representation \(\rho : G \to \GL(V)\) is <b>faithful</b> if \(\ker \rho = \{1\}\).
+</div>
+
+<p>One reason group representations are interesting to a group-theorist is the following. Given a representation \(\rho : G \to \GL(V)\), it is either faithful, or not. If it is faithful, then \(G\) is isomorphic to its image in \(\GL(V)\) which, using matrix representations below, is easy to compute with. Otherwise \(\ker \rho\) is a proper normal subgroup of \(G\) and \(G/\ker \rho\) is isomorphic to \(\rho(G)\).</p>
+
+<div class="env definition" id="def-1.8">
+<div class="env-head">Definition 1.8.</div>
+Let \(G\) be a finite group. A <b>matrix representation</b> is a group homomorphism \(\rho : G \to \GL_n(k)\), where \(\GL_n(k) = M_n(k)^\times\) denotes the group of invertible matrices under matrix multiplication.
+</div>
+
+<p>There is a close connection between representations and matrix representations. Recall the following from Part A Linear Algebra.</p>
+
+<div class="env definition" id="def-1.9">
+<div class="env-head">Definition 1.9.</div>
+Let \(\mathcal{B} := \{v_1, \ldots, v_n\}\) be a basis for \(V\) and let \(\varphi : V \to V\) be a linear map. The <b>matrix of \(\varphi\) with respect to \(\mathcal{B}\)</b> is \({}_\mathcal{B}[\varphi]_\mathcal{B} = (a_{ij})_{i,j=1}^n\) where \[\varphi(v_j) = \sum_{i=1}^n a_{ij} v_i \quad \text{for all } j = 1, \ldots, n.\]
+</div>
+
+<div class="env remark" id="rmk-1.10">
+<div class="env-head">Remark 1.10.</div>
+Let \(V\) be a vector space with basis \(\mathcal{B}\).
+<p>(a) The map \(\varphi \mapsto {}_\mathcal{B}[\varphi]_\mathcal{B}\) gives an isomorphism of groups \(\GL(V) \xrightarrow{\;\sim\;} \GL_n(k)\).</p>
+<p>(b) Every representation \(\rho : G \to \GL(V)\) gives rise to a matrix representation \(\rho_\mathcal{B} : G \to \GL_n(k)\) given by \(\rho_\mathcal{B}(g) := {}_\mathcal{B}[\rho(g)]_\mathcal{B}\) for all \(g \in G\).</p>
+<p>(c) Conversely, every matrix representation \(\sigma : G \to \GL_n(k)\) defines a representation \(\overline{\sigma} : G \to \GL(k^n)\) on the space \(k^n\) of column vectors, by letting \(\overline{\sigma}(g) : k^n \to k^n\) be the \(k\)-linear map given by \(\overline{\sigma}(g)(v) = \sigma(g)v\) for all \(g \in G,\, v \in k^n\) where \(\sigma(g)v\) means the multiplication of the \(n \times n\) matrix \(\sigma(g)\) by the \(n \times 1\) column vector \(v\). We will sometimes abuse notation and simply write \(\sigma\) for \(\overline{\sigma}\).</p>
+</div>
+
+<div class="env example" id="ex-1.11">
+<div class="env-head">Example 1.11.</div>
+Let \(G = S_3\) act on \(X = \{e_1, e_2, e_3\}\) by permutations of indices. We obtain a degree 3 permutation representation \(\rho : G \to \GL(kX)\). Since \((123) \cdot e_1 = e_2\), \((123) \cdot e_2 = e_3\), \((123) \cdot e_3 = e_1\), we see that
+\[\rho_X((123)) = \begin{pmatrix} 0 & 0 & 1 \\ 1 & 0 & 0 \\ 0 & 1 & 0 \end{pmatrix}.\]
+Similarly, one can calculate
+\[\rho_X((12)) = \begin{pmatrix} 0 & 1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1 \end{pmatrix}.\]
+</div>
+
+<div class="env warning" id="warn-1.11a">
+<div class="env-head">Warning.</div>
+In this course, permutations in \(S_n\) are multiplied from right to left, in contrast to the conventions in Prelims M1. Thus, for example, we have in \(S_3\): \((123) \cdot (12) = (13)\). This way of writing and multiplying permutations is necessary to ensure that the natural action of \(S_n\) on \(\{1, \ldots, n\}\) given by \(\sigma \cdot n = \sigma(n)\) is a left action.
+</div>
+
+<div class="env definition" id="def-1.12">
+<div class="env-head">Definition 1.12.</div>
+Let \(\rho : G \to \GL(V)\) and \(\sigma : G \to \GL(W)\) be two representations. A <b>homomorphism</b>, also known as an <b>intertwining operator</b>, is a linear map \(\varphi : V \to W\) such that \[\sigma(g) \circ \varphi = \varphi \circ \rho(g) \quad \text{for all } g \in G.\] We say that \(\varphi\) is an <b>isomorphism</b> if it is bijective.
+</div>
+
+<div class="env definition" id="def-1.13">
+<div class="env-head">Definition 1.13.</div>
+Two matrix representations \(\rho_1 : G \to \GL_n(k)\) and \(\rho_2 : G \to \GL_n(k)\) are said to be <b>equivalent</b> if there exists \(A \in \GL_n(k)\) such that \[\rho_2(g) = A\,\rho_1(g)\,A^{-1} \quad \text{for all } g \in G.\]
+</div>
+
+<p>If \(\rho_1\) and \(\rho_2\) are two equivalent matrix representations, then the equality of products of matrices \(\rho_2(g)A = A\rho_1(g)\) translates to an equality of linear maps \(\rho_2(g) \circ A = A \circ \rho_1(g)\) in \(\GL(k^n)\), which means that the representations \(\overline{\rho_1}\) and \(\overline{\rho_2}\) of \(G\) from <a class="ref" data-ref="rmk-1.10">Remark 1.10(b)</a> are isomorphic. The converse is also true.</p>
+
+<div class="env definition" id="def-1.14">
+<div class="env-head">Definition 1.14.</div>
+Let \(\rho : G \to \GL(V)\) be a representation, and let \(U\) be a linear subspace of \(V\).
+<p>(a) We say that \(U\) is <b>\(G\)-stable</b> if \(\rho(g)(u) \in U\) for all \(g \in G\) and \(u \in U\).</p>
+<p>(b) Suppose that \(U\) is \(G\)-stable. The <b>subrepresentation</b> of \(\rho\) afforded by \(U\) is \(\rho_U : G \to \GL(U)\) given by \(\rho_U(g)(u) := \rho(g)(u)\) for all \(g \in G\) and \(u \in U\).</p>
+<p>(c) Suppose that \(U\) is \(G\)-stable. The <b>quotient representation</b> of \(\rho\) afforded by \(U\) is \(\rho_{V/U} : G \to \GL(V/U)\) given by \(\rho_{V/U}(g)(v + U) := \rho(g)(v) + U\) for all \(g \in G\) and \(v + U \in V/U\).</p>
+</div>
+
+<p>The following Lemma is easy to verify directly.</p>
+
+<div class="env lemma" id="lem-1.15">
+<div class="env-head">Lemma 1.15.</div>
+Let \(\varphi : V \to W\) be a homomorphism between representations \(\rho : G \to \GL(V)\) and \(\sigma : G \to \GL(W)\).
+<p>(a) \(\ker \varphi\) is a \(G\)-stable subspace of \(V\).</p>
+<p>(b) \(\Im \varphi\) is a \(G\)-stable subspace of \(W\).</p>
+<p>(c) There is a natural isomorphism \(V/\ker \varphi \xrightarrow{\;\sim\;} \Im \varphi\) between the \(G\)-representations \(\rho_{V/\ker\varphi}\) and \(\sigma_{\Im\varphi}\).</p>
+</div>
+
+<p><a class="ref" data-ref="lem-1.15">Lemma 1.15(c)</a> is called the First Isomorphism Theorem for representations. There are also Second and Third Isomorphism Theorems — see <a class="ref" data-ref="rmk-2.6">Remark 2.6</a> below.</p>
+
+<div class="env definition" id="def-1.16">
+<div class="env-head">Definition 1.16.</div>
+Let \(G\) be a group. The <b>trivial representation</b> of \(G\) on a vector space \(V\) is \(\mathbf{1} : G \to \GL(V)\), given by \[\mathbf{1}(g)(v) = v \quad \text{for all } g \in G,\, v \in V.\]
+</div>
+
+<div class="env example" id="ex-1.17">
+<div class="env-head">Example 1.17.</div>
+Suppose that \(k\) is the finite field \(\mathbb{F}_p\) and let \(G = \langle g \rangle\) be the cyclic group of order \(p\). Let \(\rho : G \to \GL_2(k)\) be the matrix representation given by \[\rho(g^i) = \begin{pmatrix} 1 & i \\ 0 & 1 \end{pmatrix} \quad \text{for each } i \in \mathbb{Z}.\] Let \(\{v_1 = \binom{1}{0},\, v_2 = \binom{0}{1}\}\) be the standard basis for \(V = k^2\). Then \(U := \langle v_1 \rangle\) is a \(G\)-stable subspace, because \(\rho(g^i)(v_1) = v_1\) for all \(i\). The subrepresentation \(\rho_U : G \to \GL(U)\) and quotient representation \(\rho_{V/U} : G \to \GL(V/U)\) in this case are both trivial. However of course \(\rho\) itself is not trivial!
+</div>
+
+<div class="env definition" id="def-1.18">
+<div class="env-head">Definition 1.18.</div>
+The representation \(\rho : G \to \GL(V)\) is <b>irreducible</b> or <b>simple</b> if
+<ul>
+<li>\(V\) is not the zero vector space, and</li>
+<li>if \(U\) is a \(G\)-stable subspace of \(V\), then either \(U = \{0\}\) or \(U = V\).</li>
+</ul>
+</div>
+
+<p>The irreducible representations are the atoms of representation theory. The major goal of Representation Theory is to find all irreducible representations of a given group, up to isomorphism.</p>
+
+<div class="env definition" id="def-1.19">
+<div class="env-head">Definition 1.19.</div>
+Let \(\rho : G \to \GL(V)\) be a representation and let \(U\) be a \(G\)-stable subspace. A <b>\(G\)-stable complement</b> for \(U\) in \(V\) is a \(G\)-stable subspace \(W\) such that \(V = U \oplus W\).
+</div>
+
+<p>Recall from Linear Algebra that this means that \(U + W = V\) and \(U \cap W = \{0\}\).</p>
+
+<div class="env example" id="ex-1.20">
+<div class="env-head">Example 1.20.</div>
+Consider the permutation representation of \(G = S_3\) afforded by \(kX\), where \(X = \{e_1, e_2, e_3\}\) as in <a class="ref" data-ref="ex-1.11">Example 1.11</a>. Then \(U := \langle e_1 + e_2 + e_3 \rangle\) is a \(G\)-stable subspace, with \(G\) fixing every vector in \(U\). So, \(U\) is a trivial subrepresentation of \(V\). Now let \[W := \{a_1 e_1 + a_2 e_2 + a_3 e_3 : a_1 + a_2 + a_3 = 0\};\] this is a \(G\)-stable complement to \(U\) in \(V\) — provided \(\operatorname{char}(k) \neq 3\). Let \(\mathcal{B} = \{v_1, v_2\}\) where \(v_1 := e_1 - e_2\) and \(v_2 := e_2 - e_3\) so that \(\mathcal{B}\) is a basis for \(W\). Then the degree 2 matrix representation \(\sigma := (\rho_W)_\mathcal{B} : G \to \GL_2(k)\) afforded by \(W\) is determined by \[\sigma((123)) = \begin{pmatrix} 0 & -1 \\ 1 & -1 \end{pmatrix} \quad \text{and} \quad \sigma((12)) = \begin{pmatrix} -1 & 1 \\ 0 & 1 \end{pmatrix}.\]
+</div>
+
+<p>We now come to the first non-trivial result of Representation Theory.</p>
+
+<div class="env theorem" id="thm-1.21">
+<div class="env-head">Theorem 1.21 <span class="env-name">(Maschke)</span>.</div>
+Let \(G\) be a finite group and suppose that \(|G| \neq 0\) in \(k\). Let \(U\) be a \(G\)-stable subspace of a finite-dimensional \(G\)-representation \(V\). Then \(U\) admits at least one \(G\)-stable complement \(W\) in \(V\).
+</div>
+
+<div class="proof" id="proof-1.21">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+<p>By picking a basis for \(U\) and extending it to a basis for \(V\) we can find some linear complement \(Z\) for \(U\) in \(V\): \(V = U \oplus Z\). This \(Z\) will certainly not be \(G\)-stable in general. We will now use an averaging argument to replace \(Z\) with a \(G\)-stable one. To this end, let \(\pi : V \to V\) be the projection map along the decomposition \(V = U \oplus Z\), so that \(\pi(u + z) = u\) for all \(u \in U,\, z \in Z\).</p>
+<p>Define a new linear map \(\varphi : V \to V\) by the rule \[\varphi(v) := \frac{1}{|G|} \sum_{x \in G} \rho(x)\,\pi(\rho(x)^{-1}(v)) \quad \text{for all } v \in V;\] here, we use the hypothesis that the number \(|G|\) is invertible in the field \(k\). We now check directly that \(\varphi\) is a homomorphism of representations. To do this, it is helpful to use the notation \(g \cdot v := \rho(g)(v)\) for all \(g \in G,\, v \in V\). Fix \(g \in G\) and \(v \in V\). Then \[|G|\,\varphi(g \cdot v) = \sum_{x \in G} x \cdot \pi(x^{-1} \cdot (g \cdot v)).\] In this finite sum, make the substitution \(y^{-1} = x^{-1}g\). As \(x\) runs over all elements of \(G\), so does \(y\). Since \(x\) is then equal to \(gy\), we obtain \[|G|\,\varphi(g \cdot v) = \sum_{y \in G} (gy) \cdot \pi(y^{-1} \cdot v) = g \cdot \sum_{y \in G} y \cdot \pi(y^{-1} \cdot v) = g \cdot |G|\,\varphi(v).\] Cancelling \(|G|\) we deduce that \(\varphi\) is a homomorphism of representations as claimed.</p>
+<p>On the other hand, if \(u \in U\) then \[\varphi(u) = \frac{1}{|G|} \sum_{x \in G} x \cdot \pi(x^{-1} \cdot u) = \frac{1}{|G|} \sum_{x \in G} x \cdot (x^{-1} \cdot u) = u\] because \(U\) is \(G\)-stable, so \(\pi(x^{-1} \cdot u) = x^{-1} u\) for all \(x \in G\). So the restriction of \(\varphi\) to \(U\) is the identity map. On the other hand, since \(U\) is \(G\)-stable and since \(\pi(V) = U\), the definition of \(\varphi\) shows that \(\varphi(V) \subseteq U\). As \(\varphi(U) = U\) we actually have \(\varphi(V) = U\), so \(\Im(\varphi) = U\). Let \(W := \ker \varphi\), a \(G\)-stable subspace of \(V\) by <a class="ref" data-ref="lem-1.15">Lemma 1.15(a)</a>. Then \(\dim W + \dim U = \dim V\) by the Rank-Nullity Theorem, whereas if \(v \in W \cap U\) then \(0 = \varphi(v) = v\). So, \(V = U \oplus W\) and \(W\) is a \(G\)-stable complement to \(U\) in \(V\).</p>
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env remark" id="rmk-1.22">
+<div class="env-head">Remark 1.22.</div>
+<a class="ref" data-ref="thm-1.21">Maschke's Theorem</a> fails if the characteristic of our ground field \(k\) happens to divide \(|G|\), see <a class="ref" data-ref="ex-1.17">Example 1.17</a>.
+</div>
+
+<div class="env definition" id="def-1.23">
+<div class="env-head">Definition 1.23.</div>
+Let \(\rho : G \to \GL(V)\) be a representation. We say that \(\rho\) is <b>completely reducible</b> if there exist \(G\)-stable subspaces \(U_1, \ldots, U_m\) of \(V\) such that \[V = U_1 \oplus \cdots \oplus U_m\] and the subrepresentation of \(G\) afforded by each \(U_i\) is irreducible, or if \(V = \{0\}\).
+</div>
+
+<div class="env corollary" id="cor-1.24">
+<div class="env-head">Corollary 1.24.</div>
+Let \(G\) be a finite group and suppose that \(\operatorname{char}(k) \nmid |G|\). Then every finite dimensional representation \(\rho : G \to \GL(V)\) of \(G\) is completely reducible.
+</div>
+
+<div class="proof" id="proof-1.24">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Proceed by induction on \(\dim V\), the case \(\dim V = 0\) being true by definition. Let \(U_1\) be a \(G\)-stable non-zero subspace of \(V\) of smallest possible dimension. Clearly \(U_1\) is irreducible. Then \(U_1\) admits a \(G\)-stable complement \(W\) by <a class="ref" data-ref="thm-1.21">Maschke's Theorem, Theorem 1.21</a>. Now \(\dim W < \dim V\) so by induction, \(W = U_2 \oplus \cdots \oplus U_m\) for some \(G\)-stable irreducible subspaces \(U_2, \ldots, U_m\). Hence \(V = U_1 \oplus U_2 \oplus \cdots \oplus U_m\) is also completely reducible.
+</div>
+<div class="qed">□</div>
+</div>
+
+<!-- ==================== SECTION 2 ==================== -->
+<h2 class="section-heading" id="sec2">2. The group ring</h2>
+
+<p>We observed in the proof of <a class="ref" data-ref="thm-1.21">Theorem 1.21</a> that every representation \(\rho : G \to \GL(V)\) determines a left action of the group \(G\) on \(V\) via \(g \cdot v := \rho(g)(v)\) for all \(g \in G,\, v \in V\). We already noticed that sometimes when working with a representation \(\rho\) it is cumbersome to keep writing \(\rho(g)(v)\) when really one can get away with just \(g \cdot v\). On the other hand, since \(V\) is a \(k\)-vector space it also carries an action of the ground field of scalars \(k\), \((\lambda, v) \mapsto \lambda v\). This may make one suspect that in fact there is a module hiding in the background, and this is in fact the case. Recall the following from Part A Rings and Modules.</p>
+
+<div class="env definition" id="def-2.1">
+<div class="env-head">Definition 2.1.</div>
+A <b>ring</b> is an abelian group \(R\) equipped with an associative multiplication \(R \times R \to R\) written \((a, b) \mapsto a \cdot b\), which satisfies the distributive laws \[a \cdot (b + c) = a \cdot b + a \cdot c \quad \text{and} \quad (a + b) \cdot c = a \cdot c + b \cdot c \quad \text{for all } a, b, c \in R\] and which admits an identity element \(1 \in R\) such that \(1 \cdot a = a = a \cdot 1\) for all \(a \in R\).
+</div>
+
+<p>In algebraic geometry and algebraic number theory, most rings one encounters are commutative. However in this course rings are most definitely not commutative in general!</p>
+
+<div class="env definition" id="def-2.2">
+<div class="env-head">Definition 2.2.</div>
+Let \(G\) be a finite group. The <b>group ring</b> of \(G\) (with coefficients in \(k\)) is the vector space \(kG\) from <a class="ref" data-ref="def-1.5">Definition 1.5</a>, with the following multiplication: \[\left(\sum_{x \in G} a_x\, x\right) \cdot \left(\sum_{y \in G} b_y\, y\right) = \sum_{g \in G} \left(\sum_{x \in G} a_x b_{x^{-1}g}\right) g.\]
+</div>
+
+<p>It is easy to check that with this multiplication \(kG\) is an associative ring with identity element equal to \(1\) (the identity element of the group, thought of as a formal linear combination with precisely one non-zero coefficient). The group \(G\) becomes embedded into the group ring via \(g \mapsto g\): this embedding respects multiplication and thereby realises \(G\) as a subgroup of the group of units \(kG^\times\) of the ring \(kG\). We will identify \(G\) with its image in \(kG^\times\). In this way, one should think of the ring \(kG\) as being an "envelope" of the group \(G\).</p>
+
+<div class="env example" id="ex-2.3">
+<div class="env-head">Example 2.3.</div>
+Let \(G = \langle x \rangle\) be a cyclic group of order \(n\). Then \(kG\) has \(G = \{1, x, \ldots, x^{n-1}\}\) as a basis, so it is generated by \(k\) and \(x\) as a ring, and \(k\) commutes with \(x\). Define a ring homomorphism \(\varphi : k[T] \to kG\) by setting \(\varphi(f(T)) = f(x)\) for each \(f(T) \in k[T]\). Then \(\varphi\) is surjective, and \(\ker \varphi = \langle T^n - 1 \rangle\). Hence by the First Isomorphism Theorem for Rings, \[kG \cong k[T]/\langle T^n - 1 \rangle.\] If in addition the ground field \(k\) contains a primitive \(n\)-th root of unity \(\zeta\), then the polynomial \(T^n - 1\) factors into a product of distinct linear factors \((T - 1)(T - \zeta)(T - \zeta^2) \cdots (T - \zeta^{n-1})\). Then the Chinese Remainder Theorem implies that \[kG \cong k[T]/\langle T^n - 1 \rangle \cong \underbrace{k \times k \times \cdots \times k}_{n \text{ times}}.\]
+</div>
+
+<p>Next, recall the following important definition from Part A Rings and Modules.</p>
+
+<div class="env definition" id="def-2.4">
+<div class="env-head">Definition 2.4.</div>
+Let \(R\) be a ring. An <b>\(R\)-module</b> is an abelian group \(M\) equipped with a left \(R\)-action \(R \times M \to M\) which satisfies the axioms \[\begin{aligned} r \cdot (m + n) &= (r \cdot m) + (r \cdot n) \\ (r + s) \cdot m &= (r \cdot m) + (s \cdot m) \\ (r \cdot s) \cdot m &= r \cdot (s \cdot m) \\ 1 \cdot m &= m \end{aligned}\] for all \(r, s \in R\), \(m, n \in M\).
+</div>
+
+<p>Strictly speaking, what we have defined in <a class="ref" data-ref="def-2.4">Definition 2.4</a> is usually called a left module. But we will not consider right modules in this course, so all modules we will be concerned with are left modules.</p>
+
+<div class="env proposition" id="prop-2.5">
+<div class="env-head">Proposition 2.5.</div>
+Let \(V\) be a vector space and let \(G\) be a group.
+<p>(a) Suppose that \(\rho : G \to \GL(V)\) is a representation. Then \(V\) becomes a left \(kG\)-module via the action \[\left(\sum_{x \in G} a_x\, x\right) \cdot v = \sum_{x \in G} a_x\, \rho(x)(v) \quad \text{for all } a_x \in k,\, v \in V.\]</p>
+<p>(b) Suppose that \(V\) is a left \(kG\)-module. Then \(\rho : G \to \GL(V)\), defined by \(\rho(g)(v) := g \cdot v\) for all \(g \in G,\, v \in V\), is a representation of \(G\).</p>
+<p>(c) These recipes set up a bijection between the set of representations \(\rho : G \to \GL(V)\) and the set of \(kG\)-module structures \(kG \times V \to V\) on \(V\).</p>
+</div>
+
+<div class="important-convention">
+<b>Important Convention:</b> From now on, we will use the bijective correspondence provided by <a class="ref" data-ref="prop-2.5">Proposition 2.5</a> to freely convert a representation \(\rho : G \to \GL(V)\) into the corresponding \(kG\)-module \(V\), and vice versa. We will also sometimes say "\(V\) is a representation of \(G\)" when we actually mean "\(V\) is a \(kG\)-module".
+</div>
+
+<div class="env remark" id="rmk-2.6">
+<div class="env-head">Remark 2.6.</div>
+The correspondence between \(G\)-representations and \(kG\)-modules allows us to apply all general theorems about modules from Part A Rings and Modules to the study of \(G\)-representations. For example, the First, Second and Third Isomorphism Theorems, and the Correspondence Theorem hold automatically for \(G\)-representations.
+</div>
+
+<div class="env example" id="ex-2.7">
+<div class="env-head">Example 2.7.</div>
+Let \(A\) be a ring. The <b>free \(A\)-module of rank 1</b> is the abelian group \(A\) equipped with the left-multiplication action of \(A\): \(a \cdot b = ab\) for all \(a, b \in A\). \(A\)-submodules of this \(A\)-module are called <b>left ideals</b>.
+</div>
+
+<div class="env definition" id="def-2.8">
+<div class="env-head">Definition 2.8.</div>
+If \(A = kG\), the representation \(\rho : G \to \GL(kG)\) corresponding to the free \(kG\)-module of rank 1 is called the <b>left regular representation</b>.
+</div>
+
+<p>The left regular representation coincides with the permutation representation of \(G\) on \(kG\) from <a class="ref" data-ref="def-1.5">Definition 1.5</a> associated with the action of \(G\) on \(X = G\) by left multiplication.</p>
+
+<p>All of the concepts introduced in §1 above for representations have immediate generalisations in the language of modules. For example, an \(A\)-module \(M\) is said to be <em>irreducible</em>, or <em>simple</em>, if \(M\) is non-zero, and if whenever \(N\) is an \(A\)-submodule of \(M\) we must have \(N = \{0\}\) or \(N = M\) itself. A homomorphism of representations is simply a map of \(kG\)-modules, also known as a \(kG\)-linear map.</p>
+
+<p>Generalising <a class="ref" data-ref="def-1.23">Definition 1.23</a>, we say that an \(A\)-module \(V\) is completely reducible if it is either the zero module, or it is equal to a direct sum of finitely many simple submodules.</p>
+
+<div class="env definition" id="def-2.9">
+<div class="env-head">Definition 2.9.</div>
+Let \(A\) be a ring. We say that \(A\) is <b>semisimple</b> if the free \(A\)-module of rank 1 is completely reducible.
+</div>
+
+<p><a class="ref" data-ref="thm-1.21">Maschke's Theorem, Theorem 1.21</a> gives us the first important example of a semisimple ring.</p>
+
+<div class="env example" id="ex-2.10">
+<div class="env-head">Example 2.10.</div>
+Let \(G\) be a finite group such that \(|G| \neq 0\) in \(k\). Then the group ring \(kG\) is semisimple.
+</div>
+
+<div class="env definition" id="def-2.11">
+<div class="env-head">Definition 2.11.</div>
+Let \(V\) be an \(A\)-module. We say that \(V\) is <b>cyclic</b> if it can be generated by a single element \(v\): \(V = A \cdot v\). The <b>annihilator</b> of \(v \in V\) is the left ideal \[\ann_A(v) := \{a \in A : av = 0\}.\] Clearly every simple module is also cyclic.
+</div>
+
+<div class="env lemma" id="lem-2.12">
+<div class="env-head">Lemma 2.12.</div>
+Every cyclic \(A\)-module \(V\) is isomorphic to a quotient module of the free \(A\)-module of rank 1: if \(V = A \cdot v\) then \[V \cong A / \ann_A(v).\]
+</div>
+
+<div class="proof" id="proof-2.12">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+The map \(\varphi : A \to V\) given by \(a \mapsto a \cdot v\) is an \(A\)-module homomorphism. It is surjective by hypothesis. So by the First Isomorphism Theorem for modules, \(V = \Im \varphi \cong A / \ker \varphi\). However \(\ker \varphi = \ann_A(v)\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>The following trivial result has profound consequences.</p>
+
+<div class="env lemma" id="lem-2.13">
+<div class="env-head">Lemma 2.13.</div>
+Let \(V, W\) be simple \(A\)-modules. Then every non-zero \(A\)-linear map \(\varphi : V \to W\) is an isomorphism.
+</div>
+
+<div class="proof" id="proof-2.13">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+We know that \(\ker \varphi\) is an \(A\)-submodule of \(V\) and that \(\Im \varphi\) is an \(A\)-submodule of \(W\) by the module-theoretic version of <a class="ref" data-ref="lem-1.15">Lemma 1.15</a>. Since \(\varphi\) is non-zero, \(\ker \varphi\) is not all of \(V\) and \(\Im \varphi\) is not the zero module. Since \(V\) and \(W\) are both simple, we conclude that \(\ker \varphi\) is zero and \(\Im \varphi = W\). Hence \(\varphi\) is bijective, and therefore an isomorphism.
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env proposition" id="prop-2.14">
+<div class="env-head">Proposition 2.14.</div>
+Let \(A\) be a semisimple ring. Then \(A\) has only finitely many simple \(A\)-modules, up to isomorphism.
+</div>
+
+<div class="proof" id="proof-2.14">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Write \(A = V_1 \oplus \cdots \oplus V_r\) for some simple \(A\)-submodules \(V_i\) of \(A\). Let \(V\) be a simple \(A\)-module, pick a non-zero vector \(v \in V\) and consider the \(A\)-module map \(\varphi : A \to V\) from <a class="ref" data-ref="lem-2.12">Lemma 2.12</a>. Let \(\varphi_i : V_i \to V\) be the restriction of \(\varphi\) to \(V_i\), so that if \(a = a_1 + \cdots + a_m\) is the decomposition of \(a \in A\) with \(a_i \in V_i\) for each \(i\), then \(\varphi(a) = \varphi_1(a_1) + \varphi_2(a_2) + \cdots + \varphi_r(a_r)\). If \(\varphi_i\) is the zero map for all \(i\), then it follows that \(\varphi\) is also the zero map. So we see that \(\varphi_i \neq 0\) for some index \(i\). But now <a class="ref" data-ref="lem-2.13">Lemma 2.13</a> implies that this \(\varphi_i\) must be an isomorphism. So, \(V\) is isomorphic to one of the irreducible representations in the list \(V_1, V_2, \ldots, V_r\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>Here is a striking application of our new viewpoint on representations.</p>
+
+<div class="env theorem" id="thm-2.15">
+<div class="env-head">Theorem 2.15.</div>
+Let \(G\) be a finite group such that \(|G| \neq 0\) in \(k\). Then \(G\) has only finitely many irreducible representations, up to isomorphism.
+</div>
+
+<div class="proof" id="proof-2.15">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+The ring \(kG\) is semisimple by <a class="ref" data-ref="thm-1.21">Maschke's Theorem, Theorem 1.21</a>. Now apply <a class="ref" data-ref="prop-2.14">Proposition 2.14</a>.
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env definition" id="def-2.16">
+<div class="env-head">Definition 2.16.</div>
+For a finite group \(G\), we will write \(\rank(G)\) to denote the number of isomorphism classes of irreducible \(k\)-representations of \(G\).
+</div>
+
+<p>A big motivating question for us will be: how do we compute \(\rank_\mathbb{C}(G)\) effectively?</p>
+
+<!-- ==================== SECTION 3 ==================== -->
+<h2 class="section-heading" id="sec3">3. Structure of semisimple algebras</h2>
+
+<p>We begin with some very general ring theory.</p>
+
+<div class="env definition" id="def-3.1">
+<div class="env-head">Definition 3.1.</div>
+The <b>centre</b> of the ring \(A\) is \[Z(A) := \{z \in A : az = za \text{ for all } a \in A\}.\] The centre is always a commutative unital subring of \(A\).
+</div>
+
+<div class="env definition" id="def-3.2">
+<div class="env-head">Definition 3.2.</div>
+Let \(A\) be a ring and let \(V\) be an \(A\)-module. The <b>endomorphism ring</b> of \(V\), \(\End_A(V)\), is the set of all \(A\)-module homomorphisms \(\varphi : V \to V\), equipped with pointwise addition of homomorphisms, and composition as multiplication.
+</div>
+
+<p>Note that whenever \(V\) is an \(A\)-module, it also becomes an \(\End_A(V)\)-module via \(f \cdot v := f(v)\) for all \(f \in \End_A(V)\) and \(v \in V\). The two actions (of \(A\) and \(\End_A(V)\)) on \(V\) commute pointwise, by definition. This observation shows that the action of any central element \(z \in Z(A)\) on \(V\) is necessarily by an \(A\)-module endomorphism.</p>
+
+<div class="env definition" id="def-3.3">
+<div class="env-head">Definition 3.3.</div>
+We say that \(A\) is a <b>\(k\)-algebra</b> if it contains \(k\) as a central subfield. If, in addition, \(A\) is a semisimple ring, we say that \(A\) is a <b>semisimple \(k\)-algebra</b>. A homomorphism of \(k\)-algebras is a \(k\)-linear ring homomorphism.
+</div>
+
+<div class="env theorem" id="thm-3.4">
+<div class="env-head">Theorem 3.4 <span class="env-name">(Schur's Lemma)</span>.</div>
+Suppose that \(k\) is algebraically closed. Let \(V\) be a simple module over a finite dimensional \(k\)-algebra \(A\). Then every \(A\)-module endomorphism of \(V\) is given by the action of some scalar \(\lambda \in k\), so that \[\End_A(V) = k \cdot 1_V.\]
+</div>
+
+<div class="proof" id="proof-3.4">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+By <a class="ref" data-ref="lem-2.12">Lemma 2.12</a>, \(V\) is isomorphic to a quotient module of \(A\), so \(V\) is itself finite dimensional as a \(k\)-vector space. Let \(\varphi : V \to V\) be an \(A\)-module endomorphism; then in particular it is a \(k\)-linear map so it has at least one eigenvalue \(\lambda \in k\) since \(k\) is algebraically closed. This means that \(\varphi - \lambda 1_V : V \to V\) has a non-zero kernel, and is therefore not an isomorphism. So it must be the zero map, by <a class="ref" data-ref="lem-2.13">Lemma 2.13</a>. But then \(\varphi = \lambda 1_V\) is the action of \(\lambda \in k\), as required.
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env definition" id="def-3.5">
+<div class="env-head">Definition 3.5.</div>
+Let \(A\) be a \(k\)-algebra and let \(V\) be an \(A\)-module with \(\End_A(V) = k \cdot 1_V\). Then by <a class="ref" data-ref="thm-3.4">Theorem 3.4</a>, every element \(z \in Z(A)\) must act on \(V\) by a scalar, which we denote by \(z_V\). The ring homomorphism \[Z(A) \to k, \quad z \mapsto z_V\] is called the <b>central character</b> of \(V\).
+</div>
+
+<p>Using these tools, we will now focus on semisimple rings. Recall from <a class="ref" data-ref="prop-2.14">Proposition 2.14</a> that such a ring admits only finitely many simple modules up to isomorphism.</p>
+
+<div class="env notation" id="not-3.6">
+<div class="env-head">Notation 3.6.</div>
+Until the end of §3, \(A\) will denote a fixed semisimple ring, and \(V_1, \ldots, V_r\) will denote a complete list of representatives for the isomorphism classes of simple \(A\)-modules. We also fix a decomposition \[A = \bigoplus_{i=1}^{r} \bigoplus_{j=1}^{n_i} L_{i,j}\] of the \(A\)-module \(A\) into a direct sum of simple left ideals \(L_{i,j}\), where \(L_{i,j} \cong V_i\) for each \(i\) and \(j\).
+</div>
+
+<p>We must have \(n_1, \ldots, n_r \geq 1\). This is because each \(V_i\) occurs as a direct summand of \(A\) at least once: this follows from <a class="ref" data-ref="prop-2.14">Proposition 2.14</a>. Warning: the left ideals \(L_{i,j}\) are not unique, in general!</p>
+
+<div class="env proposition" id="prop-3.7">
+<div class="env-head">Proposition 3.7.</div>
+Let \(A\) be a finite dimensional semisimple \(k\)-algebra and suppose that \(k\) is algebraically closed. Then \(\dim Z(A) \leqslant r\).
+</div>
+
+<div class="proof" id="proof-3.7">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+By <a class="ref" data-ref="thm-3.4">Schur's Lemma, Theorem 3.4</a>, we have \(\End_A(V_i) = k \cdot 1_{V_i}\) for all \(i = 1, \ldots, r\). So we can define a \(k\)-linear map \(\psi : Z(A) \to k^r\) by \(\psi(z) := (z_{V_1}, z_{V_2}, \ldots, z_{V_r})\). Suppose that \(\psi(z) = 0\) for some \(z \in Z(A)\); then \(z_{V_i} = 0\) for all \(i\); we will show that \(z = 0\). Consider the decomposition of \(1 \in A\) along the decomposition from <a class="ref" data-ref="not-3.6">Notation 3.6</a>: \(1 = \sum_{i=1}^r \sum_{j=1}^{n_i} e_{i,j}\) for some \(e_{i,j} \in L_{i,j}\). Then \(z = z \cdot 1 = \sum_{i,j} z \cdot e_{i,j} = \sum_{i,j} z_{V_i} e_{i,j}\). But \(z_{V_i} = 0\) for all \(i\), so \(z = 0\). So, \(\psi\) is injective and \(\dim Z(A) \leqslant \dim k^r = r\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env lemma" id="lem-3.8">
+<div class="env-head">Lemma 3.8.</div>
+Each \(B_i := \bigoplus_{j=1}^{n_i} L_{i,j}\) is a two-sided ideal of \(A\), and \(A = B_1 \oplus \cdots \oplus B_r\).
+</div>
+
+<div class="proof" id="proof-3.8">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+It follows from <a class="ref" data-ref="not-3.6">Notation 3.6</a> that \(A = B_1 \oplus \cdots \oplus B_r\) and that each \(B_i\) is a left ideal of \(A\); it will therefore be enough to show that each \(B_i\) is also a right ideal in \(A\). Fix \(a \in A\) and consider \(L_{i,j} \subseteq B_i\). Let \(i' \neq i\) and \(1 \leqslant j' \leqslant n_{i'}\) be another pair of indices, and consider the projection \(\varphi : A \twoheadrightarrow L_{i',j'}\) along our decomposition. The restriction of \(\varphi \circ r_a : A \to L_{i',j'}\) to \(L_{i,j}\) is an \(A\)-module homomorphism from \(L_{i,j}\) to \(L_{i',j'}\). Because \(i' \neq i\), these two modules are not isomorphic, so this restriction must be the zero map by <a class="ref" data-ref="lem-2.13">Lemma 2.13</a>. Varying \(i'\) and \(j'\), we see that the projection of \(L_{i,j}a\) onto each \(B_{i'}\) with \(i' \neq i\) is equal to zero. Therefore \(L_{i,j}a \subseteq B_i\). But since \(B_i\) is equal to the sum of all of the \(L_{i,j}\), \(B_i a \subseteq B_i\) for all \(a \in A\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env lemma" id="lem-3.9">
+<div class="env-head">Lemma 3.9.</div>
+Let \(R\) be a \(k\)-algebra and suppose that \(R = S_1 \oplus \cdots \oplus S_r\) for some non-zero two-sided ideals \(S_1, \ldots, S_r\). Then \(\dim Z(R) \geq r\).
+</div>
+
+<div class="proof" id="proof-3.9">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Write \(1 = e_1 + \cdots + e_r\) for some \(e_i \in S_i\). Let \(a \in R\) and fix \(i = 1, \ldots, r\). Since \(S_i\) is a left ideal, \(ae_i \in S_i\). Since \(a = ae_1 + \cdots + ae_r\), we see that \(ae_i\) is the component of \(a\) in \(S_i\). Similarly since \(S_i\) is a right ideal, \(e_i a\) is the component of \(a\) in \(S_i\). Hence \(ae_i = e_i a\) for all \(i\) and all \(a \in R\), which shows that each \(e_i\) is central. If \(i \neq j\) then \(e_i e_j \in S_i \cap S_j = \{0\}\) so \(e_i e_j = 0\). Hence \(e_i = e_i \cdot 1 = e_i \sum_{j=1}^r e_j = e_i^2\). We have shown that \(\{e_1, \ldots, e_r\}\) forms a set of <b>pairwise orthogonal idempotents</b>: \[e_i e_j = \delta_{i,j} e_i \quad \text{for all } i, j = 1, \ldots, r.\] Now suppose that \(\sum_{i=1}^r \lambda_i e_i = 0\) for some \(\lambda_i \in k\). Multiply this equation by \(e_j\) to get \(\lambda_j e_j = 0\). If \(e_j = 0\) then for all \(a \in S_j\) we have \(a = ae_j = 0\), contradicting the assumption that \(S_j \neq \{0\}\). So \(e_j \neq 0\) for all \(j\), and this shows that \(\{e_1, \ldots, e_r\}\) is linearly independent over \(k\). Hence \(r \leqslant \dim Z(R)\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env theorem" id="thm-3.10">
+<div class="env-head">Theorem 3.10.</div>
+Let \(A\) be a finite dimensional semisimple \(k\)-algebra and suppose that \(k\) is algebraically closed. Then \(r = \dim Z(A)\).
+</div>
+
+<div class="proof" id="proof-3.10">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+By <a class="ref" data-ref="prop-3.7">Proposition 3.7</a> we have \(r \leq \dim Z(A)\). By <a class="ref" data-ref="lem-3.8">Lemma 3.8</a> we have \(A = B_1 \oplus \cdots \oplus B_r\) for some two-sided ideals \(B_i\), so <a class="ref" data-ref="lem-3.9">Lemma 3.9</a> gives the reverse inequality \(r \leqslant \dim Z(A)\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>We have now related the number of isomorphism classes of simple modules over our semisimple \(k\)-algebra to the centre of \(A\), which motivates the question of calculating \(\dim Z(kG)\). Computing the centre of group rings is very easy.</p>
+
+<div class="env definition" id="def-3.11">
+<div class="env-head">Definition 3.11.</div>
+For a finite group \(G\), let \(s(G)\) denote the number of conjugacy classes of \(G\).
+</div>
+
+<div class="env proposition" id="prop-3.12">
+<div class="env-head">Proposition 3.12.</div>
+Let \(G\) be a finite group and let \(C_1, \ldots, C_s\) be the conjugacy classes of \(G\). For each \(i = 1, \ldots, s\), define the <b>conjugacy class sum</b> of \(C_i\) to be \[\hat{c}_{C_i} := \sum_{x \in C_i} x \in kG.\] Then \(\{\hat{c}_{C_1}, \ldots, \hat{c}_{C_s}\}\) is a basis for \(Z(kG)\) as a vector space, so \(\dim Z(kG) = s(G)\).
+</div>
+
+<div class="proof" id="proof-3.12">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">Problem Sheet 1.</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env corollary" id="cor-3.13">
+<div class="env-head">Corollary 3.13.</div>
+Let \(G\) be a finite group, and let \(k\) be an algebraically closed field with \(|G| \neq 0\) in \(k\). Then \(\rank(G) = s(G)\).
+</div>
+
+<div class="proof" id="proof-3.13">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+By <a class="ref" data-ref="thm-1.21">Theorem 1.21</a>, \(kG\) is a semisimple \(k\)-algebra with \(\dim Z(kG) = s(G)\) by <a class="ref" data-ref="prop-3.12">Proposition 3.12</a>. Now apply <a class="ref" data-ref="thm-3.10">Theorem 3.10</a>.
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>We were able to obtain this striking result without really understanding the internal structure of the ring \(kG\) properly. With a little additional effort, this structure will become completely transparent at least in the case where the ground field \(k\) is algebraically closed and where Maschke's Theorem applies.</p>
+
+<p>We continue with the notation established at <a class="ref" data-ref="not-3.6">Notation 3.6</a> above.</p>
+
+<div class="env lemma" id="lem-3.14">
+<div class="env-head">Lemma 3.14.</div>
+<p>(a) Each \(B_i\) is a ring with identity element \(e_i\).</p>
+<p>(b) \(A\) is isomorphic to the product of the rings \((B_i, e_i)\): \(A \cong B_1 \times \cdots \times B_r\).</p>
+<p>(c) Each \(B_i\) is itself a semisimple ring, with unique simple module \(V_i\).</p>
+</div>
+
+<div class="proof" id="proof-3.14">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+<p>(a) <a class="ref" data-ref="lem-3.8">Lemma 3.8</a> implies that \(B_i\) is an additive subgroup of \(A\), stable under multiplication. We saw in the proof of <a class="ref" data-ref="lem-3.9">Lemma 3.9</a> that for any \(a \in A\), \(ae_i = e_i a\) is the \(B_i\)-component of \(a\) along the decomposition \(A = B_1 \oplus \cdots \oplus B_r\). So \(ae_i = e_i a = a\) for all \(a \in B_i\) which says that \(e_i\) is an identity element in \(B_i\).</p>
+<p>(b) The isomorphism sends \(a \in A\) to \((ae_1, \ldots, ae_r) \in B_1 \times \cdots \times B_r\).</p>
+<p>(c) Fix \(\ell = 1, \ldots, n_i\) and suppose that \(U\) is a \(B_i\)-submodule of \(L_{i,\ell}\). Then \(A \cdot U = \left(\bigoplus_{j=1}^r B_j\right) \cdot U \leq U\) because \(B_j \cdot U \leq B_j \cdot B_i = B_j e_j \cdot e_i B_i = 0\) if \(j \neq i\), and \(B_i \cdot U \leq U\) as \(U\) is a \(B_i\)-submodule. Hence \(U\) is also an \(A\)-submodule of \(L_{i,\ell}\), so \(U\) is either zero or all of \(L_{i,\ell}\) because \(L_{i,\ell}\) is a simple \(A\)-module. We've shown that \(L_{i,\ell}\), and hence also \(V_i\), are simple \(B_i\)-modules. Since \(B_i = \bigoplus_{j=1}^{n_i} L_{i,j}\), it is a semisimple ring. The proof of <a class="ref" data-ref="prop-2.14">Proposition 2.14</a> now shows that \(V_i\) is the only simple \(B_i\)-module, up to isomorphism.</p>
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env warning" id="warn-3.14a">
+<div class="env-head">Warning.</div>
+Even though each \(B_i\) is an additive subgroup of \(A\) stable under multiplication, it is not a unital subring when \(r \geq 2\), because its identity element \(e_i\) is then not equal to the identity element \(1\) in \(A\).
+</div>
+
+<div class="env definition" id="def-3.15">
+<div class="env-head">Definition 3.15.</div>
+Let \(A\) be a ring. The <b>opposite ring</b> to \(A\), \(A^{\mathrm{op}}\), has \(A\) as the underlying abelian group, but with the following new multiplication: \[a \star b := ba \quad \text{for all } a, b \in A^{\mathrm{op}}.\]
+</div>
+
+<div class="env proposition" id="prop-3.16">
+<div class="env-head">Proposition 3.16.</div>
+Let \(B\) be a semisimple ring with exactly one simple module \(V\), up to isomorphism. Suppose that \(B \cong \underbrace{V \oplus \cdots \oplus V}_{n \text{ times}}\) as a left \(B\)-module, and let \(D := \End_B(V)\). Then there is a ring isomorphism \[B \cong M_n(D^{\mathrm{op}}).\]
+</div>
+
+<div class="proof" id="proof-3.16">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+By Problem Sheet 2, we know that \(B\) is isomorphic to \(\End_B(B)^{\mathrm{op}}\). Since \(B = V^n\) as a left \(B\)-module, we have \(\End_B(B) \cong M_n(D)\). Hence, \(B \cong \End_B(B)^{\mathrm{op}} \cong M_n(D)^{\mathrm{op}} \cong M_n(D^{\mathrm{op}})\). See Problem Sheet 2 for more details.
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env theorem" id="thm-3.17">
+<div class="env-head">Theorem 3.17 <span class="env-name">(Artin–Wedderburn)</span>.</div>
+Suppose that \(k\) is an algebraically closed field and that \(A\) is a finite dimensional semisimple \(k\)-algebra. Then there exist positive integers \(n_1, n_2, \ldots, n_r\) and a \(k\)-algebra isomorphism \[A \xrightarrow{\;\sim\;} M_{n_1}(k) \times \cdots \times M_{n_r}(k).\]
+</div>
+
+<div class="proof" id="proof-3.17">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+By <a class="ref" data-ref="lem-3.14">Lemma 3.14</a>, we may assume that \(r = 1\), so that \(A\) has exactly one simple module \(V\) up to isomorphism. Then \(A \cong M_n(D^{\mathrm{op}})\) where \(D := \End_A(V)\), by <a class="ref" data-ref="prop-3.16">Proposition 3.16</a>. But \(D \cong k\) by <a class="ref" data-ref="thm-3.4">Schur's Lemma, Theorem 3.4</a>.
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env corollary" id="cor-3.18">
+<div class="env-head">Corollary 3.18.</div>
+Suppose that \(k\) is algebraically closed. Let \(G\) be a finite group such that \(|G| \neq 0\) in \(k\) and let \(V_1, \ldots, V_r\) be a complete list of pairwise non-isomorphic simple \(kG\)-modules.
+<p>(a) \(kG \cong V_1^{\dim V_1} \oplus V_2^{\dim V_2} \oplus \cdots \oplus V_r^{\dim V_r}\) as a \(kG\)-module.</p>
+<p>(b) \(|G| = \sum_{i=1}^r (\dim V_i)^2\).</p>
+</div>
+
+<div class="proof" id="proof-3.18">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+<p>(a) \(kG\) is a semisimple ring by <a class="ref" data-ref="thm-1.21">Maschke's Theorem, Theorem 1.21</a>, so \(kG \cong M_{n_1}(k) \times \cdots \times M_{n_r}(k)\) by the <a class="ref" data-ref="thm-3.17">Artin–Wedderburn Theorem, Theorem 3.17</a>. The matrix algebra \(M_n(k)\) acts on the space of column vectors \(k^n\) naturally by left multiplication, \(k^n\) is then a simple \(M_n(k)\)-module and \(M_n(k)\) is isomorphic to a direct sum of precisely \(n\) copies of this simple module by Problem Sheet 1. So, \(n_i = \dim V_i\) for each \(i = 1, \ldots, r\).</p>
+<p>(b) This is immediate from part (a).</p>
+</div>
+<div class="qed">□</div>
+</div>
+
+<!-- ==================== SECTION 4 ==================== -->
+<h2 class="section-heading" id="sec4">4. Multilinear algebra</h2>
+
+<p>The regular representation of \(G\) afforded by \(kG\) gives a good way to theoretically bound the number of possible irreducible representations. But it does not really help us to find them. We harness the full power of linear algebra here to find many new representations from old. Throughout §4, \(G\) will denote a fixed finite group.</p>
+
+<p>The following observation will be useful for constructing \(G\)-representations.</p>
+
+<div class="env lemma" id="lem-4.1">
+<div class="env-head">Lemma 4.1.</div>
+Let \(V\) be a vector space and let \(G \times V \to V\) be a \(G\)-action on the set \(V\). Then this extends to a \(kG\)-module structure on \(V\) if and only if the \(G\)-action on \(V\) is <b>linear</b>, which means that the following condition holds: \[g \cdot (v + \lambda w) = (g \cdot v) + \lambda(g \cdot w) \quad \text{for all } g \in G,\, v, w \in V,\, \lambda \in k.\]
+</div>
+
+<div class="env definition" id="def-4.2">
+<div class="env-head">Definition 4.2.</div>
+Let \(V, W\) be \(G\)-representations. The <b>(external) direct sum</b> is the vector space \(V \oplus W := V \times W\) which is again a \(G\)-representation via \[g \cdot (v, w) = (g \cdot v, g \cdot w) \quad \text{for all } g \in G,\, v \in V,\, w \in W.\]
+</div>
+
+<div class="env definition" id="def-4.3">
+<div class="env-head">Definition 4.3.</div>
+Let \(V\) be a \(G\)-representation. The <b>dual representation</b> is the space \(V^*\) of all linear functions \(f : V \to k\) on \(V\). The group \(G\) acts on \(V^*\) via \[(g \cdot f)(v) := f(g^{-1} \cdot v) \quad \text{for all } g \in G,\, f \in V^*,\, v \in V.\] This action is linear so we get a new \(G\)-representation \(V^*\) of the same dimension as \(V\). Note the inverse appearing in this definition! Without it, the axiom \(g \cdot (h \cdot f) = (gh) \cdot f\) for a \(G\)-action does not hold.
+</div>
+
+<div class="env definition" id="def-4.4">
+<div class="env-head">Definition 4.4.</div>
+Let \(V, W\) be \(G\)-representations. The vector space \(\Hom(V, W)\) of all linear maps from \(V\) to \(W\) admits a linear \(G\)-action given by \[(g \cdot f)(v) = g \cdot f(g^{-1} \cdot v) \quad \text{for all } g \in G,\, f \in \Hom(V, W),\, v \in V.\] In the case where \(W\) is the trivial 1-dimensional representation, we recover the dual space \(\Hom(V, k) = V^*\), so <a class="ref" data-ref="def-4.4">Definition 4.4</a> is a generalisation of <a class="ref" data-ref="def-4.3">Definition 4.3</a>.
+</div>
+
+<div class="env lemma" id="lem-4.5">
+<div class="env-head">Lemma 4.5.</div>
+Let \(V\) be a finite dimensional \(G\)-representation. The natural biduality isomorphism from Part A Linear Algebra \[\tau : V \to (V^*)^*, \quad \tau(v)(f) := f(v) \quad \text{for all } f \in V^*,\, v \in V\] is an isomorphism of \(G\)-representations.
+</div>
+
+<div class="env definition" id="def-4.6">
+<div class="env-head">Definition 4.6.</div>
+Let \(V\) and \(W\) be two vector spaces, let \(\{v_1, \ldots, v_m\}\) be a basis for \(V\) and let \(\{w_1, \ldots, w_n\}\) be a basis for \(W\). The <b>tensor product</b> of \(V\) and \(W\), \(V \otimes W\), is the free vector space (see <a class="ref" data-ref="def-1.4">Definition 1.4</a>) on the set of formal symbols \(\{v_i \otimes w_j : 1 \leqslant i \leqslant m,\, 1 \leqslant j \leqslant n\}\). If \(v = \sum_{i=1}^m \lambda_i v_i\) and \(w = \sum_{j=1}^n \mu_j w_j\) are elements of \(V\) and \(W\) respectively, we define the <b>elementary tensor</b> \[v \otimes w := \sum_{i=1}^m \sum_{j=1}^n \lambda_i \mu_j (v_i \otimes w_j) \in V \otimes W.\]
+</div>
+
+<div class="env remark" id="rmk-4.7">
+<div class="env-head">Remarks 4.7.</div>
+<p>(a) From the definition we see that \(\dim V \otimes W = (\dim V)(\dim W)\).</p>
+<p>(b) The elementary tensors span \(V \otimes W\).</p>
+<p>(c) Not every element of \(V \otimes W\) is an elementary tensor \(v \otimes w\).</p>
+</div>
+
+<p>It may appear that this definition depends on the choice of bases for \(V\) and \(W\). To address this, we have the following</p>
+
+<div class="env lemma" id="lem-4.8">
+<div class="env-head">Lemma 4.8.</div>
+Let \(\{v'_1, \ldots, v'_m\}\) and \(\{w'_1, \ldots, w'_n\}\) be other bases for \(V\) and \(W\), respectively. Then \(X' := \{v'_i \otimes w'_j : 1 \leqslant i \leqslant m,\, 1 \leqslant j \leqslant n\}\) is a basis for \(V \otimes W\).
+</div>
+
+<div class="proof" id="proof-4.8">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+The elementary tensors in \(V \otimes W\) distribute, in the sense that \((v + v') \otimes (w + w') = (v \otimes w) + (v \otimes w') + (v' \otimes w) + (v' \otimes w')\) for all \(v, v' \in V,\, w, w' \in W\) and also that \((\lambda v) \otimes w = \lambda(v \otimes w) = v \otimes (\lambda w)\) for all \(v \in V,\, w \in W,\, \lambda \in k\). Using this, we can write each \(v_i\) as a linear combination of \(\{v'_1, \ldots, v'_m\}\) and each \(w_j\) as a linear combination of \(\{w'_1, \ldots, w'_n\}\), and see that the original basis vectors \(v_i \otimes w_j\) all lie in the span of \(X'\). Therefore \(X'\) spans \(V \otimes W\) as a vector space, but being a set of size at most \(mn\), it must be linearly independent and is therefore a basis.
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>Note that there is a canonical map \(\otimes : V \times W \to V \otimes W\), \((v, w) \mapsto v \otimes w\) which is <b>bilinear</b>. In fact, this map is universal with respect to this property, in the following sense.</p>
+
+<div class="env lemma" id="lem-4.9">
+<div class="env-head">Lemma 4.9 <span class="env-name">(Universal Property of Tensor Product)</span>.</div>
+Let \(V\) and \(W\) be vector spaces. Then for every bilinear map \(b : V \times W \to U\) to some third vector space \(U\), there is a unique linear map \(\tilde{b} : V \otimes W \to U\) such that \[b(v, w) = \tilde{b}(v \otimes w) \quad \text{for all } v, w \in V.\]
+</div>
+
+<div class="proof" id="proof-4.9">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Fix bases \(\{v_1, \ldots, v_n\}\) for \(V\) and \(\{w_1, \ldots, w_m\}\) for \(W\). Let \(b : V \times W \to U\) be a bilinear map, and define \(\tilde{b} : V \otimes W \to U\) to be the unique linear map which sends the basis vector \(v_i \otimes w_j \in V \otimes W\) to \(b(v_i, w_j)\). Let \(v = \sum_i \lambda_i v_i \in V\) and \(w = \sum_j \mu_j w_j \in W\). Then \(\tilde{b}\) sends the elementary tensor \(v \otimes w = \sum_{i,j} \lambda_i \mu_j v_i \otimes w_j\) to \[\sum_{i,j} \lambda_i \mu_j b(v_i, w_j) = b\!\left(\sum_i \lambda_i v_i,\, \sum_j \mu_j w_j\right) = b(v, w)\] because \(b\) is bilinear. Uniqueness follows because any such map must agree with \(\tilde{b}\) on the basis \(\{v_i \otimes w_j\}\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env definition" id="def-4.10">
+<div class="env-head">Definition 4.10.</div>
+Let \(V\) and \(W\) be finite dimensional \(kG\)-modules. Define a \(G\)-action on the tensor product \(V \otimes W\) by setting \[g \cdot (v \otimes w) := (g \cdot v) \otimes (g \cdot w) \quad \text{for all } g \in G,\, v \in V,\, w \in W.\] This defines the <b>tensor product representation</b> \(V \otimes W\).
+</div>
+
+<p>It is straightforward to check that this defines a linear \(G\)-action on \(V \otimes W\) in the sense of <a class="ref" data-ref="lem-4.1">Lemma 4.1</a>, and therefore a \(G\)-representation.</p>
+
+<div class="env lemma" id="lem-4.11">
+<div class="env-head">Lemma 4.11.</div>
+Let \(V\) and \(W\) be finite dimensional \(kG\)-modules. Then there is an isomorphism of \(kG\)-modules \[V^* \otimes W \xrightarrow{\;\sim\;} \Hom(V, W).\]
+</div>
+
+<div class="proof" id="proof-4.11">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+For every \(f \in V^*\) and \(w \in W\), we have a linear map \(b(f, w) : V \to W\) given by \(b(f, w)(v) := f(v)w\). The resulting map \(b : V^* \times W \to \Hom(V, W)\) is bilinear, so by <a class="ref" data-ref="lem-4.9">Lemma 4.9</a> it extends to a linear map \(\alpha : V^* \otimes W \to \Hom(V, W)\) given by \(\alpha(f \otimes w)(v) := f(v)w\). Let \(\{v_1, \ldots, v_n\}\) be a basis for \(V\) and let \(\{v_1^*, \ldots, v_n^*\}\) be the corresponding dual basis for \(V^*\). Then we define a linear map \(\beta : \Hom(V, W) \to V^* \otimes W\), \(f \mapsto \sum_{i=1}^n v_i^* \otimes f(v_i)\). One checks that \(\alpha \circ \beta = 1_{\Hom(V,W)}\). We leave the verification that \(\beta \circ \alpha = 1_{V^* \otimes W}\) and that \(\alpha\) is a homomorphism of \(kG\)-modules to Problem Sheet 2.
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>It turns out that the tensor square \(V \otimes V\) is reducible whenever \(\dim V \geq 2\).</p>
+
+<div class="env definition" id="def-4.12">
+<div class="env-head">Definition 4.12.</div>
+Suppose that \(\operatorname{char}(k) \neq 2\) and let \(V\) be a finite dimensional vector space.
+<p>(a) For each \(v, w \in V\), define \(v \cdot w := \tfrac{1}{2}(v \otimes w + w \otimes v) \in V \otimes V\). The <b>symmetric square</b> of \(V\) is the following subspace of \(V \otimes V\): \[S^2 V := \langle \{v \cdot w : v, w \in V\} \rangle.\]</p>
+<p>(b) For each \(v, w \in V\), define \(v \wedge w := \tfrac{1}{2}(v \otimes w - w \otimes v) \in V \otimes V\). The <b>alternating square</b> of \(V\) is the following subspace of \(V \otimes V\): \[\textstyle\bigwedge^2 V := \langle \{v \wedge w : v, w \in V\} \rangle.\]</p>
+<p>Note that \(v \cdot w = w \cdot v\) in \(S^2 V\) and that \(v \wedge w = -w \wedge v\) in \(\bigwedge^2 V\) for all \(v, w \in V\).</p>
+</div>
+
+<div class="env lemma" id="lem-4.13">
+<div class="env-head">Lemma 4.13.</div>
+Let \(\dim V = n\) and suppose that \(\operatorname{char}(k) \neq 2\).
+<p>(a) \(V \otimes V = S^2 V \oplus \bigwedge^2 V\).</p>
+<p>(b) \(\dim S^2 V = \frac{n(n+1)}{2}\) and \(\dim \bigwedge^2 V = \frac{n(n-1)}{2}\).</p>
+<p>(c) If \(V\) is a \(G\)-representation, then so are \(S^2 V\) and \(\bigwedge^2 V\) via \(g \cdot (v \cdot w) = (g \cdot v) \cdot (g \cdot w)\) and \(g \cdot (v \wedge w) = (g \cdot v) \wedge (g \cdot w)\) for all \(g \in G,\, v, w \in V\).</p>
+</div>
+
+<div class="proof" id="proof-4.13">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+<p>(a) Let \(S_2 = \langle \sigma \rangle\) be the cyclic group of order 2. Since \(\operatorname{char}(k) \neq 2\), the group ring \(kS_2\) admits orthogonal idempotents \(e_1 := \frac{1+\sigma}{2}\) and \(e_2 := \frac{1-\sigma}{2}\), which give rise to the ideal decomposition from <a class="ref" data-ref="lem-3.8">Lemma 3.8</a>: \(kS_2 = ke_1 \oplus ke_2\). Every \(kS_2\)-module \(M\) admits an even-odd decomposition \(M = e_1 M \oplus e_2 M\). Now \(S_2\) acts linearly on \(V \otimes V\) via \(\sigma \cdot (v \otimes w) = w \otimes v\). Then \(S^2 V = e_1 \cdot (V \otimes V)\) is the even part and \(\bigwedge^2 V = e_2 \cdot (V \otimes V)\) is the odd part.</p>
+<p>(b) If \(\{v_1, \ldots, v_n\}\) is a basis for \(V\) then \(\{v_i \cdot v_j : 1 \leqslant i \leqslant j \leqslant n\}\) spans \(S^2 V\), so \(\dim S^2 V \leqslant \frac{n(n+1)}{2}\). Similarly, \(\{v_i \wedge v_j : 1 \leqslant i < j \leqslant n\}\) spans \(\bigwedge^2 V\), so \(\dim \bigwedge^2 V \leqslant \frac{n(n-1)}{2}\). But \(\dim V \otimes V = n^2\), so \(V \otimes V = S^2 V \oplus \bigwedge^2 V\) implies the result.</p>
+<p>(c) The \(G\)-action and \(S_2\)-action on \(V \otimes V\) commute pointwise: \(\sigma \cdot (g \cdot (v \otimes w)) = g \cdot (\sigma \cdot (v \otimes w))\). In particular, the \(G\)-action preserves \(S^2 V\) and \(\bigwedge^2 V\).</p>
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>Using similar ideas, it is possible to find proper \(kG\)-submodules of the tensor cube \(V \otimes V \otimes V\), one for each irreducible representation of \(kS_3\). Similarly we obtain a decomposition of the \(n\)th tensor power \(V^{\otimes n}\) of \(V\) as a direct sum of \(kG\)-submodules \(S_\lambda(V)\), one for each irreducible representation \(\lambda\) of the symmetric group \(S_n\). This construction \(V \mapsto S_\lambda(V)\) is called a <b>Schur functor</b>.</p>
+
+<!-- ==================== SECTION 5 ==================== -->
+<h2 class="section-heading" id="sec5">5. Character theory</h2>
+
+<p>We will now specialise to the case \(k = \mathbb{C}\). It turns out that \(G\)-representations are determined by what appears to be very little information at all, namely the knowledge of the character of that representation.</p>
+
+<div class="env definition" id="def-5.1">
+<div class="env-head">Definition 5.1.</div>
+Let \(\rho : G \to \GL(V)\) be a complex representation of \(G\). The <b>character</b> of \(\rho\) is the function \[\chi_\rho : G \to \mathbb{C}, \quad g \mapsto \tr\, \rho(g).\] The <b>degree</b> of a character \(\chi_\rho\) is the degree of the representation \(\rho\).
+</div>
+
+<p>We will also write \(\chi_V\) to denote the character of the representation afforded by a \(\mathbb{C}G\)-module \(V\), when the \(\mathbb{C}G\)-module structure on \(V\) is understood.</p>
+
+<div class="env definition" id="def-5.2">
+<div class="env-head">Definition 5.2.</div>
+A function \(f : G \to \mathbb{C}\) is said to be a <b>class function</b> if it is constant on conjugacy classes of \(G\): \[f(xgx^{-1}) = f(g) \quad \text{for all } g, x \in G.\] We will denote the space of all class functions on \(G\) by \(\mathcal{C}(G)\).
+</div>
+
+<div class="env lemma" id="lem-5.3">
+<div class="env-head">Lemma 5.3.</div>
+The character \(\chi_V\) of any finite dimensional \(kG\)-module \(V\) is a class function.
+</div>
+
+<div class="proof" id="proof-5.3">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+If \(\rho : G \to \GL(V)\) is the corresponding representation, then the linear endomorphism \(\rho(g)\) of \(V\) is conjugate to \(\rho(xgx^{-1})\) in \(\GL(V)\). But conjugate linear maps have the same trace: \(\tr(ABA^{-1}) = \tr((AB)A^{-1}) = \tr(A^{-1}(AB)) = \tr(B)\) for any \(A, B \in \GL(V)\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env definition" id="def-5.4">
+<div class="env-head">Definition 5.4.</div>
+Let \(G\) be a finite group, let \(\{g_1, \ldots, g_s\}\) be a set of representatives for the conjugacy classes of \(G\) and let \(V_1, \ldots, V_r\) be a complete list of representatives for the isomorphism classes of simple \(\mathbb{C}G\)-modules. The <b>character table</b> of \(G\) is the \(r \times s\) array with \((i,j)\)-th entry being given by \(\chi_{V_i}(g_j)\).
+</div>
+
+<p>Recall from <a class="ref" data-ref="cor-3.13">Corollary 3.13</a> that in fact \(r = \rank_\mathbb{C}(G)\) is equal to \(s = s(G)\), so the character table is always square.</p>
+
+<div class="env lemma" id="lem-5.5">
+<div class="env-head">Lemma 5.5.</div>
+Let \(\rho : G \to \GL(V)\) be a finite dimensional representation.
+<p>(a) \(\chi_V(1) = \dim V\).</p>
+<p>(b) \(\chi_V(g) = \chi_V(1)\) if and only if \(\rho(g) = 1\).</p>
+<p>(c) If \(\dim V = 1\) then \(\chi\) is a group homomorphism.</p>
+<p>(d) If \(G\) is abelian and \(V\) is irreducible, then \(\dim V = 1\).</p>
+</div>
+
+<div class="proof" id="proof-5.5">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">Problem Sheet 3.</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env example" id="ex-5.6">
+<div class="env-head">Example 5.6.</div>
+<p>(a) The character table of the cyclic group of order 3, \(G = \{1, x, x^2\}\) is</p>
+<table class="char-table">
+<tr><th></th><th>\(1\)</th><th>\(x\)</th><th>\(x^2\)</th></tr>
+<tr><td>\(\mathbf{1}\)</td><td>\(1\)</td><td>\(1\)</td><td>\(1\)</td></tr>
+<tr><td>\(\chi\)</td><td>\(1\)</td><td>\(\omega\)</td><td>\(\omega^2\)</td></tr>
+<tr><td>\(\chi^2\)</td><td>\(1\)</td><td>\(\omega^2\)</td><td>\(\omega\)</td></tr>
+</table>
+<p>where \(\omega := e^{2\pi i/3}\) is a primitive cube root of unity.</p>
+<p>(b) Let \(G = S_3\). In addition to the trivial character, we have the sign character \(\epsilon : S_3 \to \{\pm 1\} \subset \mathbb{C}^\times\), defined by \(\epsilon(\sigma) = 1\) if \(\sigma\) is even and \(\epsilon(\sigma) = -1\) if \(\sigma\) is odd. We also have the two-dimensional irreducible representation \(W\) of \(S_3\) from <a class="ref" data-ref="ex-1.20">Example 1.20</a>. Since \(1^2 + 1^2 + 2^2 = 6 = |S_3|\), we have found all the characters, and the character table of \(S_3\) is</p>
+<table class="char-table">
+<tr><th></th><th>\(1\)</th><th>\((123)\)</th><th>\((12)\)</th></tr>
+<tr><td>\(\mathbf{1}\)</td><td>\(1\)</td><td>\(1\)</td><td>\(1\)</td></tr>
+<tr><td>\(\epsilon\)</td><td>\(1\)</td><td>\(1\)</td><td>\(-1\)</td></tr>
+<tr><td>\(\chi_W\)</td><td>\(2\)</td><td>\(-1\)</td><td>\(0\)</td></tr>
+</table>
+</div>
+
+<p>Characters of degree 1 are called <b>linear characters</b>. We have the following important consequence of our study of the group ring \(\mathbb{C}G\) from §3.</p>
+
+<div class="env proposition" id="prop-5.7">
+<div class="env-head">Proposition 5.7.</div>
+Let \(\chi_1, \ldots, \chi_r\) be the complete list of characters of the irreducible complex representations of the finite group \(G\). Then \[\chi_1(1)^2 + \cdots + \chi_r(1)^2 = |G|.\]
+</div>
+
+<div class="proof" id="proof-5.7">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Suppose that the simple \(kG\)-module \(V_i\) affords the character \(\chi_i\). Then \(\chi_i(1) = \dim V_i\) by <a class="ref" data-ref="lem-5.5">Lemma 5.5(a)</a>; now use <a class="ref" data-ref="cor-3.18">Corollary 3.18(b)</a>.
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env definition" id="def-5.8">
+<div class="env-head">Definition 5.8.</div>
+Let \(N\) be a normal subgroup of the finite group \(G\) and let \(\rho : G/N \to \GL(V)\) be a representation. The <b>inflated representation</b> of \(G\) is \(\dot{\rho} : G \to \GL(V)\) defined by \(\dot{\rho}(g) := \rho(gN)\) for all \(g \in G\).
+</div>
+
+<div class="env definition" id="def-5.9">
+<div class="env-head">Definition 5.9.</div>
+Let \(G\) be a finite group. The <b>derived subgroup</b>, \(G'\), is the subgroup of \(G\) generated by all commutators \([x, y] := xyx^{-1}y^{-1}\) in \(G\): \[G' := \langle xyx^{-1}y^{-1} : x, y \in G \rangle.\]
+</div>
+
+<div class="env lemma" id="lem-5.10">
+<div class="env-head">Lemma 5.10.</div>
+Let \(G\) be a finite group. Then \(G\) has precisely \(|G : G'|\) distinct complex linear characters.
+</div>
+
+<div class="proof" id="proof-5.10">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">Problem Sheet 3.</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env example" id="ex-5.11">
+<div class="env-head">Example 5.11.</div>
+Let \(G = A_4\) be the alternating group of order 12. We know that \(A_4\) has a normal subgroup of order 4, called the Klein four-group \(V_4 := \{1, (12)(34), (14)(23), (13)(24)\}\). Since \(A_4/V_4\) has order 3, it must be a cyclic group of order 3, hence abelian, so \(A_4' \leqslant V_4\) and \(|A_4'| \in \{1, 2, 4\}\). No subgroup of order 2 in \(V_4\) is normal in \(A_4\). So, \(A_4'\) has to be \(V_4\): it cannot be the trivial group since \(A_4\) is non-abelian.
+<p><b>Conclusion:</b> \(A_4\) admits 3 distinct linear characters, inflated from \(A_4/V_4 \cong C_3\).</p>
+</div>
+
+<div class="env definition" id="def-5.12">
+<div class="env-head">Definition 5.12.</div>
+Let \(G\) be a finite group. The <b>inner product on class functions</b> \[\langle -, - \rangle : \mathcal{C}(G) \times \mathcal{C}(G) \to \mathbb{C}\] is defined as follows: \[\langle \varphi, \psi \rangle := \frac{1}{|G|} \sum_{g \in G} \varphi(g)\,\overline{\psi(g)}.\]
+</div>
+
+<p>It is routine to verify that this is indeed a complex inner product on \(\mathcal{C}(G)\).</p>
+
+<p>We can now state our next big theorem.</p>
+
+<div class="env theorem" id="thm-5.13">
+<div class="env-head">Theorem 5.13 <span class="env-name">(Row Orthogonality)</span>.</div>
+Let \(\varphi, \psi\) be irreducible characters of the finite group \(G\). Then \[\langle \varphi, \psi \rangle = \begin{cases} 1 & \text{if } \varphi = \psi, \\ 0 & \text{if } \varphi \neq \psi. \end{cases}\]
+</div>
+
+<p><a class="ref" data-ref="thm-5.13">Theorem 5.13</a> has the following striking consequence.</p>
+
+<div class="env corollary" id="cor-5.14">
+<div class="env-head">Corollary 5.14.</div>
+Let \(V\) and \(W\) be two finite dimensional \(kG\)-modules. Then \(V\) is isomorphic to \(W\) if and only if \(\chi_V = \chi_W\).
+</div>
+
+<div class="proof" id="proof-5.14">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Let \(\chi_1, \ldots, \chi_r\) be the complete list of characters of the irreducible complex representations of \(G\), and suppose that \(V_i\) is the simple \(kG\)-module with character \(\chi_i\). By <a class="ref" data-ref="thm-1.21">Maschke's Theorem, Theorem 1.21</a>, we know that \(V\) is a direct sum of simple \(kG\)-modules. We can find non-negative integers \(a_1, \ldots, a_r\) such that \(V \cong V_1^{a_1} \oplus \cdots \oplus V_r^{a_r}\). Passing to characters, \(\chi_V = a_1 \chi_1 + \cdots + a_r \chi_r\), and now <a class="ref" data-ref="thm-5.13">Theorem 5.13</a> tells us that \(a_i = \langle \chi_i, \chi_V \rangle\). Now, if \(\chi_V = \chi_W\) and \(W \cong V_1^{b_1} \oplus \cdots \oplus V_r^{b_r}\), then \(a_i = \langle \chi_i, \chi_V \rangle = \langle \chi_i, \chi_W \rangle = b_i\) for each \(i\). Therefore \(V \cong W\). The converse is trivial.
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env corollary" id="cor-5.15">
+<div class="env-head">Corollary 5.15.</div>
+The irreducible characters of \(G\) form an orthonormal basis for \(\mathcal{C}(G)\).
+</div>
+
+<div class="proof" id="proof-5.15">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+We know that \(\langle \chi_i, \chi_j \rangle = \delta_{i,j}\) by <a class="ref" data-ref="thm-5.13">Theorem 5.13</a>, so the \(\chi_i\)'s are pairwise orthogonal elements of the inner product space \(\mathcal{C}(G)\) by <a class="ref" data-ref="lem-5.3">Lemma 5.3</a>. Now \(\dim \mathcal{C}(G) = s(G) = \rank_\mathbb{C}(G) = r\) by <a class="ref" data-ref="cor-3.13">Corollary 3.13</a>, so \(\{\chi_1, \ldots, \chi_r\}\) forms a basis for \(\mathcal{C}(G)\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>Let us see how to use <a class="ref" data-ref="thm-5.13">Theorem 5.13</a> to compute character tables.</p>
+
+<div class="env definition" id="def-5.16">
+<div class="env-head">Definition 5.16.</div>
+Let \(G\) be a finite group and let \(g \in G\).
+<p>(a) \(g^G\) denotes the <b>conjugacy class</b> of \(g\) in \(G\): \(g^G := \{g^x : x \in G\}\) where \(g^x := x^{-1}gx\).</p>
+<p>(b) \(C_G(g)\) denotes the <b>centraliser</b> of \(g\) in \(G\): \(C_G(g) = \{x \in G : gx = xg\}\).</p>
+</div>
+
+<div class="env lemma" id="lem-5.17">
+<div class="env-head">Lemma 5.17.</div>
+For any \(g \in G\) we have \(|g^G| \cdot |C_G(g)| = |G|\).
+</div>
+
+<div class="proof" id="proof-5.17">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Apply the Orbit-Stabiliser Theorem from Prelims M1 to the conjugation action of \(G\) on itself: the orbit of \(g \in G\) is its conjugacy class, and the stabiliser of \(g\) is precisely the centraliser \(C_G(g)\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env example" id="ex-5.18">
+<div class="env-head">Example 5.18.</div>
+<p>Let \(G = A_4\). Then \(A_4' = V_4\) and \(G\) has 3 distinct linear characters by <a class="ref" data-ref="ex-5.11">Example 5.11</a>. The representatives for the conjugacy classes in \(A_4\) are \(1,\, g_2 := (12)(34),\, g_3 := (123)\) and \(g_4 := (132)\). So, \(A_4\) has exactly 4 conjugacy classes, and therefore \(\rank_\mathbb{C}(G) = s(G) = 4\) because the character table is square by <a class="ref" data-ref="cor-3.13">Corollary 3.13</a>.</p>
+<p>By <a class="ref" data-ref="prop-5.7">Proposition 5.7</a>, \(1^2 + 1^2 + 1^2 + d^2 = |G| = 12\), so \(d = 3\). Using <a class="ref" data-ref="thm-5.13">Theorem 5.13</a> to compute the orthogonality relations, we find \(a = -1\) and \(b = c = 0\). The full character table of \(A_4\) is:</p>
+<table class="char-table">
+<tr><th>\(g\)</th><th>\(1\)</th><th>\(g_2\)</th><th>\(g_3\)</th><th>\(g_4\)</th></tr>
+<tr><th>\(|g^G|\)</th><th>\(1\)</th><th>\(3\)</th><th>\(4\)</th><th>\(4\)</th></tr>
+<tr><th>\(|C_G(g)|\)</th><th>\(12\)</th><th>\(4\)</th><th>\(3\)</th><th>\(3\)</th></tr>
+<tr><td>\(\chi_1\)</td><td>\(1\)</td><td>\(1\)</td><td>\(1\)</td><td>\(1\)</td></tr>
+<tr><td>\(\chi_2\)</td><td>\(1\)</td><td>\(1\)</td><td>\(\omega\)</td><td>\(\omega^2\)</td></tr>
+<tr><td>\(\chi_3\)</td><td>\(1\)</td><td>\(1\)</td><td>\(\omega^2\)</td><td>\(\omega\)</td></tr>
+<tr><td>\(\chi_4\)</td><td>\(3\)</td><td>\(-1\)</td><td>\(0\)</td><td>\(0\)</td></tr>
+</table>
+<p>where \(\omega = e^{2\pi i/3}\).</p>
+</div>
+
+<p>We now start working towards the proof of <a class="ref" data-ref="thm-5.13">Theorem 5.13</a>.</p>
+
+<div class="env definition" id="def-5.19">
+<div class="env-head">Definition 5.19.</div>
+Let \(V\) be a \(\mathbb{C}G\)-module. The <b>invariant submodule</b> of \(V\) is \[V^G := \{v \in V : g \cdot v = v \text{ for all } g \in G\}.\] Clearly \(V^G\) is the largest subspace of \(V\) on which \(G\) acts trivially.
+</div>
+
+<div class="env proposition" id="prop-5.20">
+<div class="env-head">Proposition 5.20 <span class="env-name">(Fixed Point Formula)</span>.</div>
+Let \(G\) be a finite group and let \(V\) be a finite dimensional \(\mathbb{C}G\)-module. Then \[\dim V^G = \frac{1}{|G|} \sum_{g \in G} \chi_V(g) = \langle \mathbf{1}, \chi_V \rangle.\]
+</div>
+
+<div class="proof" id="proof-5.20">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Let \(e := \frac{1}{|G|} \sum_{g \in G} g \in \mathbb{C}G\). Then \(ge = eg = e\) for all \(g \in G\) so \(e^2 = e\); this is why \(e\) is called the <b>principal idempotent</b> of \(\mathbb{C}G\). We have \(V = e \cdot V \oplus (1 - e) \cdot V\). One checks that \(e \cdot V = V^G\). The action of \(e\) on \(V\) is a linear map \(e_V : V \to V\) which is an idempotent with image \(e \cdot V\). So, writing \(\rho : G \to \GL(V)\) for the representation afforded by \(V\), \[\dim V^G = \dim e \cdot V = \tr(e_V) = \frac{1}{|G|} \sum_{g \in G} \tr\,\rho(g) = \frac{1}{|G|} \sum_{g \in G} \chi_V(g).\]
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>Before we give the proof of <a class="ref" data-ref="thm-5.13">Theorem 5.13</a>, we need to compute the characters of the representations obtained through various multilinear constructions from §4. Observe that the vector space of class functions \(\mathcal{C}(G)\) is in fact a commutative ring, via pointwise multiplication: \((\varphi\psi)(g) := \varphi(g)\psi(g)\).</p>
+
+<div class="env proposition" id="prop-5.21">
+<div class="env-head">Proposition 5.21.</div>
+Let \(G\) be a finite group and let \(V\), \(W\) be finite dimensional \(\mathbb{C}G\)-modules. Then we have the following equalities in \(\mathcal{C}(G)\):
+<p>(a) \(\chi_{V^*} = \overline{\chi_V}\),</p>
+<p>(b) \(\chi_{V \oplus W} = \chi_V + \chi_W\),</p>
+<p>(c) \(\chi_{V \otimes W} = \chi_V \chi_W\),</p>
+<p>(d) \(\chi_{\Hom(V,W)} = \overline{\chi_V}\, \chi_W\),</p>
+<p>(e) \(\chi_{S^2 V}(g) = \tfrac{1}{2}(\chi_V(g)^2 + \chi_V(g^2))\) for all \(g \in G\),</p>
+<p>(f) \(\chi_{\bigwedge^2 V}(g) = \tfrac{1}{2}(\chi_V(g)^2 - \chi_V(g^2))\) for all \(g \in G\).</p>
+</div>
+
+<div class="proof" id="proof-5.21">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+<p>Fix \(g \in G\). By Problem Sheet 1, the action \(g_V \in \GL(V)\) of \(g\) on \(V\) is diagonalisable. Fix a basis of \(g_V\)-eigenvectors \(\{v_1, \ldots, v_n\}\) for \(V\) with corresponding eigenvalues \(\lambda_1, \ldots, \lambda_n\), and fix a basis of \(g_W\)-eigenvectors \(\{w_1, \ldots, w_m\}\) for \(W\) with eigenvalues \(\mu_1, \ldots, \mu_m\).</p>
+<p>(a) Let \(\{v_1^*, \ldots, v_n^*\}\) be the dual basis for \(V^*\). One checks that \(g \cdot v_i^* = \overline{\lambda_i}\, v_i^*\) since each \(\lambda_i\) is a root of unity. Hence \(\chi_{V^*}(g) = \sum_i \overline{\lambda_i} = \overline{\chi_V(g)}\).</p>
+<p>(c) The elementary tensors \(\{v_i \otimes w_j\}\) form a basis of eigenvectors for the \(g\)-action on \(V \otimes W\) with eigenvalue \(\lambda_i \mu_j\). Therefore \(\chi_{V \otimes W}(g) = \sum_{i,j} \lambda_i \mu_j = \chi_V(g)\chi_W(g)\).</p>
+<p>(d) By <a class="ref" data-ref="lem-4.11">Lemma 4.11</a>, \(\Hom(V, W) \cong V^* \otimes W\). Then parts (a) and (c) give \(\chi_{\Hom(V,W)} = \overline{\chi_V}\, \chi_W\).</p>
+<p>(b,e,f) Problem Sheet 3.</p>
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env proposition" id="prop-5.22">
+<div class="env-head">Proposition 5.22.</div>
+Let \(V\) and \(W\) be finite dimensional \(\mathbb{C}G\)-modules. Then
+<p>(a) \(\Hom_{\mathbb{C}G}(V, W) = \Hom(V, W)^G\) and</p>
+<p>(b) \(\langle \chi_V, \chi_W \rangle = \dim \Hom_{\mathbb{C}G}(V, W)\).</p>
+</div>
+
+<div class="proof" id="proof-5.22">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+<p>(a) Let \(f \in \Hom(V, W)\). Then \(f\) is fixed by the \(G\)-action if and only if \(g \cdot f(g^{-1} \cdot v) = f(v)\) for all \(g \in G,\, v \in V\), i.e., if and only if \(g_W \circ f = f \circ g_V\) for all \(g \in G\). <a class="ref" data-ref="def-1.12">Definition 1.12</a> tells us that this is the same as \(f \in \Hom_{\mathbb{C}G}(V, W)\).</p>
+<p>(b) Apply the <a class="ref" data-ref="prop-5.20">Fixed Point Formula</a> to the \(G\)-representation \(\Hom(V, W)\) from <a class="ref" data-ref="def-4.4">Definition 4.4</a>. By <a class="ref" data-ref="prop-5.20">Proposition 5.20</a> and <a class="ref" data-ref="prop-5.21">Proposition 5.21(d)</a>, \[\dim \Hom(V, W)^G = \frac{1}{|G|} \sum_{g \in G} \chi_{\Hom(V,W)}(g) = \frac{1}{|G|} \sum_{g \in G} \overline{\chi_V(g)}\,\chi_W(g) = \langle \chi_V, \chi_W \rangle.\]</p>
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>We can now prove the Row Orthogonality Theorem.</p>
+
+<div class="proof" id="proof-5.13">
+<div class="proof-head">Proof of <a class="ref" data-ref="thm-5.13">Theorem 5.13</a>.</div>
+<div class="proof-body">
+Let \(V\) and \(W\) be the simple \(\mathbb{C}G\)-modules whose characters are \(\varphi = \chi_V\) and \(\psi = \chi_W\), respectively. Since \(V\) and \(W\) are simple, <a class="ref" data-ref="thm-3.4">Schur's Lemma (Theorem 3.4)</a> and <a class="ref" data-ref="lem-2.13">Lemma 2.13</a> together tell us that \(\dim \Hom_{\mathbb{C}G}(V, W) = 1\) if \(V \cong W\), and \(0\) otherwise. Using <a class="ref" data-ref="prop-5.22">Proposition 5.22</a>, \(\langle \varphi, \psi \rangle = \dim \Hom_{\mathbb{C}G}(V, W) \in \{0, 1\}\).
+<p>If \(\chi_V = \chi_W\) then \(\langle \chi_V, \chi_W \rangle = \|\chi_V\|^2 = \frac{1}{|G|}\sum_{g \in G} |\chi_V(g)|^2 \geq \frac{(\dim V)^2}{|G|} > 0\), so \(\langle \chi_V, \chi_V \rangle = 1\). If \(\chi_V \neq \chi_W\) then \(V\) cannot be isomorphic to \(W\), so \(\langle \varphi, \psi \rangle = 0\).</p>
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>Next we come to another consequence of the Row Orthogonality Theorem, which will turn out to be very useful for completing character tables.</p>
+
+<div class="env theorem" id="thm-5.23">
+<div class="env-head">Theorem 5.23 <span class="env-name">(Column Orthogonality)</span>.</div>
+Let \(G\) be a finite group, let \(\chi_1, \ldots, \chi_r\) be the irreducible characters of \(G\) and let \(g, h \in G\). Then \[\sum_{i=1}^r \chi_i(g)\,\overline{\chi_i(h)} = \begin{cases} |C_G(g)| & \text{if } g \text{ is conjugate to } h, \\ 0 & \text{otherwise.} \end{cases}\]
+</div>
+
+<div class="proof" id="proof-5.23">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+<p>Let \(\{g_1, \ldots, g_r\}\) be conjugacy class representatives. Define \(x_{i,j} := \chi_i(g_j) \cdot c_j\) where \(c_j := \sqrt{|g_j^G|/|G|}\). Then Row Orthogonality (<a class="ref" data-ref="thm-5.13">Theorem 5.13</a>) shows that the \(r \times r\) matrix \(X = (x_{i,j})\) satisfies \(X \cdot \overline{X}^T = I\), so \(X\) is unitary. Applying complex conjugation to \(\overline{X}^T \cdot X = I\), we obtain \(X^T \cdot \overline{X} = I\). Hence \(\sum_{i=1}^r \chi_i(g_j)\,c_j\, \overline{\chi_i(g_k)}\,c_k = \delta_{j,k}\). Dividing by \(c_j c_k\) and using <a class="ref" data-ref="lem-5.17">Lemma 5.17</a> gives the result.</p>
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env example" id="ex-5.24">
+<div class="env-head">Example 5.24.</div>
+<p>Let \(G\) be the symmetric group \(S_4\). The conjugacy class representatives are \(g_1 = 1\), \(g_2 = (12)(34)\), \(g_3 = (123)\), \(g_4 = (12)\), \(g_5 = (1234)\), with conjugacy classes of sizes \(1, 3, 8, 6, 6\) respectively. We know from Problem Sheet 0 that \(V_4\) is a normal subgroup of \(G\) with \(S_4/V_4 \cong S_3\). This gives three irreducible characters by inflation from \(S_3\) using <a class="ref" data-ref="ex-5.6">Example 5.6(b)</a>. Since \(\rank_\mathbb{C}(G) = s(G) = 5\) by <a class="ref" data-ref="cor-3.13">Corollary 3.13</a>, we are missing two irreducible characters \(\chi_4\) and \(\chi_5\) of degrees \(d_4\) and \(d_5\). Then \(d_4^2 + d_5^2 = 24 - 1 - 1 - 4 = 18\). The only solution in positive integers is \(d_4 = d_5 = 3\). Using <a class="ref" data-ref="thm-5.23">Column Orthogonality (Theorem 5.23)</a>, we determine the complete character table of \(S_4\):</p>
+<table class="char-table">
+<tr><th>\(g\)</th><th>\(1\)</th><th>\((12)(34)\)</th><th>\((123)\)</th><th>\((12)\)</th><th>\((1234)\)</th></tr>
+<tr><th>\(|g^G|\)</th><th>\(1\)</th><th>\(3\)</th><th>\(8\)</th><th>\(6\)</th><th>\(6\)</th></tr>
+<tr><th>\(|C_G(g)|\)</th><th>\(24\)</th><th>\(8\)</th><th>\(3\)</th><th>\(4\)</th><th>\(4\)</th></tr>
+<tr><td>\(\tilde{\mathbf{1}}\)</td><td>\(1\)</td><td>\(1\)</td><td>\(1\)</td><td>\(1\)</td><td>\(1\)</td></tr>
+<tr><td>\(\tilde{\epsilon}\)</td><td>\(1\)</td><td>\(1\)</td><td>\(1\)</td><td>\(-1\)</td><td>\(-1\)</td></tr>
+<tr><td>\(\tilde{\chi}_W\)</td><td>\(2\)</td><td>\(2\)</td><td>\(-1\)</td><td>\(0\)</td><td>\(0\)</td></tr>
+<tr><td>\(\chi_4\)</td><td>\(3\)</td><td>\(-1\)</td><td>\(0\)</td><td>\(1\)</td><td>\(-1\)</td></tr>
+<tr><td>\(\chi_5\)</td><td>\(3\)</td><td>\(-1\)</td><td>\(0\)</td><td>\(-1\)</td><td>\(1\)</td></tr>
+</table>
+</div>
+
+<!-- ==================== SECTION 6 ==================== -->
+<h2 class="section-heading" id="sec6">6. Induced representations</h2>
+
+<p>The Row and Column orthogonality theorems, <a class="ref" data-ref="thm-5.13">Theorems 5.13</a> and <a class="ref" data-ref="thm-5.23">Theorem 5.23</a> are powerful tools but they are only good for completing character tables and not for constructing them. We will now introduce a powerful new technique of constructing representations of \(G\) using representations of its proper subgroups. This technique is called <b>induction</b>.</p>
+
+<p>We return to the setting of \(kG\)-modules over a general field \(k\) for now.</p>
+
+<div class="env definition" id="def-6.1">
+<div class="env-head">Definition 6.1.</div>
+Let \(H\) be a finite group and let \(V\) be a \(kH\)-module. The vector space of <b>\(H\)-coinvariants</b> \(V_H\) of \(V\) is \[V_H := V / k\{h \cdot v - v : h \in H,\, v \in V\}.\] Equivalently, this is the largest quotient \(kH\)-module of \(V\) which is isomorphic to a trivial module.
+</div>
+
+<div class="env lemma" id="lem-6.2">
+<div class="env-head">Lemma 6.2.</div>
+Let \(H\) be a subgroup of the finite group \(G\), let \(W\) be a \(kH\)-module.
+<p>(a) There is a linear \(G\)-action on \(kG \otimes W\) given on elementary tensors by \(g \cdot (x \otimes w) := gx \otimes w\) for all \(g, x \in G,\, w \in W\). We call this the <b>left \(G\)-action</b>.</p>
+<p>(b) There is a linear \(H\)-action on \(kG \otimes W\) given on elementary tensors by \(h \star (x \otimes w) := xh^{-1} \otimes h \cdot w\) for all \(h \in H,\, x \in G,\, w \in W\). We call this the <b>right \(H\)-action</b>.</p>
+<p>(c) The two actions commute pointwise: \(g \cdot (h \star u) = h \star (g \cdot u)\) for all \(g \in G,\, h \in H,\, u \in kG \otimes W\).</p>
+</div>
+
+<div class="env corollary" id="cor-6.3">
+<div class="env-head">Corollary 6.3.</div>
+Let \(H\) be a subgroup of the finite group \(G\) and let \(W\) be a \(kH\)-module. Then the space of \(H\)-coinvariants \((kG \otimes W)_H\) of \(kG \otimes W\) with respect to the right \(H\)-action is a \(kG\)-module.
+</div>
+
+<div class="proof" id="proof-6.3">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+The action of \(G\) on \(kG \otimes W\) preserves the subspace \((H - 1) \star (kG \otimes W)\): for each \(u \in kG \otimes W\), \(g \in G\), \(h \in H\) we have \(g \cdot (h \star u - u) = h \star (g \cdot u) - (g \cdot u) \in (H - 1) \star (kG \otimes W)\) by <a class="ref" data-ref="lem-6.2">Lemma 6.2(c)</a>. So, the \(G\)-action on \(kG \otimes W\) descends to the right \(H\)-coinvariants.
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env definition" id="def-6.4">
+<div class="env-head">Definition 6.4.</div>
+Let \(H\) be a subgroup of \(G\) and let \(W\) be a \(kH\)-module.
+<p>(a) The <b>induced \(kG\)-module</b> \(\Ind_H^G W\) is the space of \(H\)-coinvariants \(\Ind_H^G W := (kG \otimes W)_H\) of \(kG \otimes W\) under the right \(H\)-action from <a class="ref" data-ref="lem-6.2">Lemma 6.2</a>.</p>
+<p>(b) We will write \(g \overline{\otimes} w\) to denote the image of \(g \otimes w \in kG \otimes W\) in the quotient vector space \(\Ind_H^G W\).</p>
+<p>(c) If \(\sigma : H \to \GL(W)\) is the representation of \(H\) afforded by \(W\), we call the representation of \(G\) afforded by \(\Ind_H^G W\) the <b>induced representation</b> and denote it by \(\Ind_H^G \sigma\).</p>
+</div>
+
+<div class="env lemma" id="lem-6.5">
+<div class="env-head">Lemma 6.5.</div>
+Let \(g \in G\) and \(w \in W\). Then
+<p>(a) \(gh \overline{\otimes} w = g \overline{\otimes} h \cdot w\) for all \(h \in H\), and</p>
+<p>(b) \(g \cdot (x \overline{\otimes} w) = gx \overline{\otimes} w\) for all \(x \in G\).</p>
+</div>
+
+<div class="env lemma" id="lem-6.6">
+<div class="env-head">Lemma 6.6.</div>
+Let \(x \in G\). Then \(xkH \otimes W\) is an \(H\)-stable subspace of \(kG \otimes W\) under the right \(H\)-action, and there is a linear isomorphism \[\alpha : W \xrightarrow{\;\sim\;} (xkH \otimes W)_H, \quad w \mapsto x \overline{\otimes} w,\] so that \((xkH \otimes W)_H = x \overline{\otimes} W\).
+</div>
+
+<div class="env proposition" id="prop-6.7">
+<div class="env-head">Proposition 6.7.</div>
+Let \(\{x_1, \ldots, x_m\}\) be a complete set of left coset representatives for \(H\) in \(G\) so that \(G = x_1 H \cup \cdots \cup x_m H\).
+<p>(a) There is a vector space decomposition \[\Ind_H^G W = (x_1 \overline{\otimes} W) \oplus (x_2 \overline{\otimes} W) \oplus \cdots \oplus (x_m \overline{\otimes} W).\]</p>
+<p>(b) We have \(\dim \Ind_H^G W = |G : H| \dim W\).</p>
+</div>
+
+<div class="proof" id="proof-6.7">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+By <a class="ref" data-ref="lem-6.6">Lemma 6.6</a>, \(xkH \otimes W\) is an \(H\)-stable subspace for any \(x \in G\). Since \(G\) is the disjoint union of the left cosets \(x_i H\), \(kG \otimes W = \bigoplus_{i=1}^m x_i kH \otimes W\). Taking \(H\)-coinvariants and applying <a class="ref" data-ref="lem-6.6">Lemma 6.6</a> gives the result.
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env example" id="ex-6.8">
+<div class="env-head">Example 6.8.</div>
+There is a \(kG\)-linear isomorphism \(k(G/H) \cong \Ind_H^G \mathbf{1}\) between the permutation module \(k(G/H)\) from <a class="ref" data-ref="def-1.5">Definition 1.5</a> and the induced module \(\Ind_H^G \mathbf{1}\).
+</div>
+
+<div class="env definition" id="def-6.9">
+<div class="env-head">Definition 6.9.</div>
+Let \(H\) be a subgroup of \(G\) and let \(V\) be a \(kG\)-module. Then \(V\) is also a \(kH\)-module by restricting the action of \(kG\) to its subring \(kH\); we denote the resulting \(kH\)-module \(\Res_H^G V\).
+</div>
+
+<p>In categorical terms, our next result tells us that "induction is left-adjoint to restriction".</p>
+
+<div class="env proposition" id="prop-6.10">
+<div class="env-head">Proposition 6.10.</div>
+Let \(H\) be a subgroup of the finite group \(G\), let \(W\) be a \(kH\)-module and let \(U\) be a \(kG\)-module. Then there is a linear isomorphism \[\Phi : \Hom_{kG}(\Ind_H^G W,\, U) \xrightarrow{\;\sim\;} \Hom_{kH}(W,\, \Res_H^G U)\] given by \(\Phi(\alpha)(w) = \alpha(1 \overline{\otimes} w)\) for all \(\alpha \in \Hom_{kG}(\Ind_H^G W, U)\) and all \(w \in W\).
+</div>
+
+<div class="proof" id="proof-6.10">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+The map \(W \to \Res_H^G \Ind_H^G W\) given by \(w \mapsto 1 \overline{\otimes} w\) is \(kH\)-linear. Hence, given a \(kG\)-linear \(\alpha : \Ind_H^G W \to U\), we can precompose with this map to obtain the \(kH\)-linear map \(\Phi(\alpha)\). We construct a map \(\Psi\) in the opposite direction: for \(\beta : W \to \Res_H^G U\) \(kH\)-linear, define \(\Psi(\beta) : \Ind_H^G W \to U\) by \(\Psi(\beta)(g \overline{\otimes} w) := g \cdot \beta(w)\). This is well-defined by the \(kH\)-linearity of \(\beta\) and is \(kG\)-linear. One checks that \(\Phi\) and \(\Psi\) are mutually inverse.
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>We will now again specialise to the case \(k = \mathbb{C}\).</p>
+
+<div class="env definition" id="def-6.11">
+<div class="env-head">Definition 6.11.</div>
+Let \(H\) be a subgroup of the finite group \(G\).
+<p>(a) Let \(\psi\) be a character of \(G\) afforded by the \(\mathbb{C}G\)-module \(V\). Then the <b>restricted character</b> is the character \(\Res_H^G \psi\) of the \(\mathbb{C}H\)-module \(\Res_H^G V\).</p>
+<p>(b) Let \(\varphi\) be a character of \(H\) afforded by the \(\mathbb{C}H\)-module \(W\). Then the <b>induced character</b> is the character \(\Ind_H^G \varphi\) of the \(\mathbb{C}G\)-module \(\Ind_H^G W\).</p>
+</div>
+
+<div class="env corollary" id="cor-6.12">
+<div class="env-head">Corollary 6.12 <span class="env-name">(Frobenius Reciprocity)</span>.</div>
+Let \(\varphi\) be a character of \(H\) and let \(\psi\) be a character of \(G\). Then \[\langle \Ind_H^G \varphi, \psi \rangle_G = \langle \varphi, \Res_H^G \psi \rangle_H.\]
+</div>
+
+<div class="proof" id="proof-6.12">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Let \(U\) be the \(\mathbb{C}G\)-module whose character is \(\psi\), and let \(W\) be the \(\mathbb{C}H\)-module whose character is \(\varphi\). Applying <a class="ref" data-ref="prop-5.22">Proposition 5.22</a> twice, \(\langle \Ind_H^G \varphi, \psi \rangle_G = \dim \Hom_{\mathbb{C}G}(\Ind_H^G W, U)\) and \(\langle \varphi, \Res_H^G \psi \rangle_H = \dim \Hom_{\mathbb{C}H}(W, \Res_H^G U)\). Now apply <a class="ref" data-ref="prop-6.10">Proposition 6.10</a>.
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env example" id="ex-6.13">
+<div class="env-head">Example 6.13.</div>
+Let \(U\) be a simple \(\mathbb{C}G\)-module and consider the trivial character \(\mathbf{1}\) of \(H := \{1\}\). Then \(\Ind_H^G \mathbf{1}\) is the character of the free \(\mathbb{C}G\)-module of rank 1 by <a class="ref" data-ref="ex-6.8">Example 6.8</a>. Then <a class="ref" data-ref="cor-6.12">Frobenius Reciprocity</a> tells us that \(\langle \Ind_H^G \mathbf{1}, \chi_U \rangle_G = \langle \mathbf{1}, \Res_H^G \chi_U \rangle_H = \dim U\). In other words, \(U\) appears in \(\mathbb{C}G\) precisely \(\dim U\) times. We knew this already — see <a class="ref" data-ref="cor-3.18">Corollary 3.18(a)</a>.
+</div>
+
+<div class="env lemma" id="lem-6.14">
+<div class="env-head">Lemma 6.14.</div>
+Let \(H\) be a subgroup of the finite group \(G\). Let \(\{x_1, \ldots, x_m\}\) be a complete set of left coset representatives for \(H\) in \(G\). For each \(g \in G\), write \(gx_i H = x_{g \cdot i} H\) for some permutation \(i \mapsto g \cdot i\) of \(\{1, \ldots, m\}\). Define \(\Fix(g) := \{i \in \{1, \ldots, m\} : g \cdot i = i\}\). Then for every finite dimensional \(\mathbb{C}H\)-module \(W\):
+<p>(a) \(g \cdot (x_i \overline{\otimes} W) \subseteq x_{g \cdot i} \overline{\otimes} W\) for all \(i\), and</p>
+<p>(b) \((\Ind_H^G \chi_W)(g) = \sum_{i \in \Fix(g)} \chi_W(x_i^{-1} g x_i)\).</p>
+</div>
+
+<div class="env definition" id="def-6.15">
+<div class="env-head">Definition 6.15.</div>
+For each \(\varphi : H \to \mathbb{C}\), define its <b>extension by zero</b> to \(G\) to be the function \(\varphi^\circ : G \to \mathbb{C}\) which agrees with \(\varphi\) on \(H\) and which is zero on \(G \setminus H\).
+</div>
+
+<div class="env theorem" id="thm-6.16">
+<div class="env-head">Theorem 6.16.</div>
+Let \(H\) be a subgroup of the finite group \(G\) and let \(W\) be a finite dimensional \(\mathbb{C}H\)-module. Then for all \(g \in G\) we have \[(\Ind_H^G \chi_W)(g) = \frac{1}{|H|} \sum_{x \in G} \chi_W^\circ(x^{-1} g x).\]
+</div>
+
+<div class="proof" id="proof-6.16">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Fix \(g \in G\). Using the notation of <a class="ref" data-ref="lem-6.14">Lemma 6.14</a>, note that \(i \in \Fix(g) \Leftrightarrow x_i^{-1} g x_i \in H\). So we can rewrite <a class="ref" data-ref="lem-6.14">Lemma 6.14(b)</a> as \((\Ind_H^G \chi_W)(g) = \sum_{i=1}^m \chi_W^\circ(x_i^{-1} g x_i)\). Since \(\chi_W^\circ\) is constant on \(H\)-conjugacy classes and \(G \setminus H\) is stable under conjugation by \(H\), we have \(\chi_W^\circ((x_i h)^{-1} g (x_i h)) = \chi_W^\circ(x_i^{-1} g x_i)\) for any \(h \in H\). Therefore \(\sum_{x \in G} \chi_W^\circ(x^{-1} g x) = |H| \sum_{i=1}^m \chi_W^\circ(x_i^{-1} g x_i)\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env remark" id="rmk-6.17">
+<div class="env-head">Remark 6.17.</div>
+It could very well happen that \(g^G \cap H = \emptyset\). In this case, <a class="ref" data-ref="thm-6.16">Theorem 6.16</a> tells us that \((\Ind_H^G \chi_W)(g) = 0\).
+</div>
+
+<div class="env corollary" id="cor-6.18">
+<div class="env-head">Corollary 6.18.</div>
+Let \(H\) be a subgroup of \(G\). For each \(\varphi \in \mathcal{C}(H)\), define \[(\Ind_H^G \varphi)(g) := \frac{1}{|H|} \sum_{x \in G} \varphi^\circ(x^{-1}gx).\] Then \(\Ind_H^G : \mathcal{C}(H) \to \mathcal{C}(G)\) is left adjoint to the map \(\Res_H^G : \mathcal{C}(G) \to \mathcal{C}(H)\): \[\langle \Ind_H^G \varphi, \psi \rangle_G = \langle \varphi, \Res_H^G \psi \rangle_H \quad \text{for all } \varphi \in \mathcal{C}(H),\, \psi \in \mathcal{C}(G).\]
+</div>
+
+<div class="env corollary" id="cor-6.19">
+<div class="env-head">Corollary 6.19.</div>
+Let \(H\) be a subgroup of \(G\). Let \(g \in G\), and let \(\{h_1, \ldots, h_\ell\}\) be a complete set of representatives for the conjugacy classes in \(H\) contained in \(g^G \cap H\): \(g^G \cap H = h_1^H \cup \cdots \cup h_\ell^H\). Then for every finite dimensional \(\mathbb{C}H\)-module \(W\), \[\chi_{\Ind_H^G W}(g) = \frac{|G|}{|H|} \sum_{i=1}^\ell \frac{|h_i^H|}{|g^G|}\, \chi_W(h_i).\]
+</div>
+
+<div class="env definition" id="def-6.20">
+<div class="env-head">Definition 6.20.</div>
+Let \(N\) be a normal subgroup of \(G\), let \(x \in G\) and let \(\varphi : N \to \mathbb{C}\). The <b>\(x\)-twist</b> of \(\varphi\) is the function \[\varphi^x : N \to \mathbb{C}, \quad h \mapsto \varphi(x^{-1}hx).\] Since conjugation by \(x\) is an automorphism of \(N\), it permutes the conjugacy classes of \(N\), so \(\varphi^x \in \mathcal{C}(N)\) whenever \(\varphi \in \mathcal{C}(N)\). This defines a permutation action of \(G/N\) on \(\mathcal{C}(N)\) via \(xN \cdot \varphi = \varphi^x\).
+</div>
+
+<div class="env proposition" id="prop-6.21">
+<div class="env-head">Proposition 6.21.</div>
+Let \(\varphi\) be a character of the normal subgroup \(N\) of \(G\). Then
+<p>(a) \(\varphi^x\) is another character of \(N\), and</p>
+<p>(b) \(\Res_N^G \Ind_N^G \varphi = \varphi^{x_1} + \cdots + \varphi^{x_m}\), where \(\{x_1, \ldots, x_m\}\) is a complete set of left coset representatives for \(N\) in \(G\).</p>
+</div>
+
+<p>We can now give a construction of irreducible characters using induction.</p>
+
+<div class="env corollary" id="cor-6.22">
+<div class="env-head">Corollary 6.22.</div>
+Let \(\varphi\) be an irreducible character of the normal subgroup \(N\) of \(G\), such that \(\varphi^x \neq \varphi\) for all \(x \in G \setminus N\). Then the character \(\Ind_N^G \varphi\) is irreducible.
+</div>
+
+<div class="proof" id="proof-6.22">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+We use <a class="ref" data-ref="cor-6.12">Frobenius Reciprocity, Corollary 6.12</a>, to compute \(\|\Ind_N^G \varphi\|^2\): \(\langle \Ind_N^G \varphi, \Ind_N^G \varphi \rangle_G = \langle \Res_N^G \Ind_N^G \varphi, \varphi \rangle_N\). But \(\Res_N^G \Ind_N^G \varphi = \varphi^{x_1} + \cdots + \varphi^{x_m}\) by <a class="ref" data-ref="prop-6.21">Proposition 6.21</a>. We may assume \(x_1 = 1\); our assumption \(\varphi^x \neq \varphi\) for all \(x \in G \setminus N\) implies that \(\varphi^{x_i} \neq \varphi\) for \(i \geq 2\). Because each \(\varphi^{x_i}\) is irreducible, \(\langle \varphi, \varphi \rangle_N = 1\) and \(\langle \varphi^{x_i}, \varphi \rangle_N = 0\) for \(i \geq 2\) by <a class="ref" data-ref="thm-5.13">Theorem 5.13</a>. Hence \(\|\Ind_N^G \varphi\|^2 = 1\) and we can use <a class="ref" data-ref="cor-5.15">Corollary 5.15</a> to deduce that \(\Ind_N^G \varphi\) is irreducible.
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>Using <a class="ref" data-ref="cor-6.22">Corollary 6.22</a>, we can now find all irreducible characters of the dihedral groups \(D_{2n}\). We only treat the case where \(n = 2m + 1\) is odd.</p>
+
+<div class="env example" id="ex-6.23">
+<div class="env-head">Example 6.23.</div>
+Let \(G\) be the dihedral group of order \(4m + 2\) for some \(m \geq 1\). Then \(G\) has \(m\) irreducible characters of degree 2, and two linear characters.
+
+<div class="proof" id="proof-6.23">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Write \(G = \langle r, s : r^{2m+1} = s^2 = 1,\, srs^{-1} = r^{-1} \rangle\) and note that \(N := \langle r \rangle\) is a normal cyclic subgroup of order \(2m + 1\). By <a class="ref" data-ref="lem-5.10">Lemma 5.10</a>, \(N\) has \(2m + 1\) linear characters \(\{\varphi_i : 0 \leqslant i \leqslant 2m\}\) where \(\varphi\) sends \(r\) to a fixed primitive \((2m+1)\)th root of unity \(\zeta\). We calculate \((\varphi_i)^s(r^j) = \varphi_i(s^{-1}r^j s) = \varphi_i(r^{-j}) = \zeta^{-ij} = \varphi_{2m+1-i}(r^j)\). So the trivial character is fixed under the conjugation action, and the other irreducible characters break up into \(m\) orbits of size 2. For each \(i = 1, \ldots, m\), the induced character \(\chi_i := \Ind_N^G \varphi_i\) is irreducible by <a class="ref" data-ref="cor-6.22">Corollary 6.22</a>, and these are pairwise distinct degree 2 characters. Inflation from \(G/N \cong C_2\) gives two distinct linear characters. Since \(\sum_{i=1}^m \chi_i(1)^2 + 1^2 + 1^2 = 4m + 2 = |G|\), <a class="ref" data-ref="cor-3.18">Corollary 3.18(b)</a> says we have found all irreducible characters.
+</div>
+<div class="qed">□</div>
+</div>
+</div>
+
+<!-- ==================== SECTION 7 ==================== -->
+<h2 class="section-heading" id="sec7">7. Algebraic integers and Burnside's \(p^\alpha q^\beta\) theorem</h2>
+
+<div class="env definition" id="def-7.1">
+<div class="env-head">Definition 7.1.</div>
+Let \(z \in \mathbb{C}\).
+<p>(a) We say that \(z\) is an <b>algebraic number</b> if \(z\) satisfies a polynomial equation with rational coefficients.</p>
+<p>(b) We say that \(z\) is an <b>algebraic integer</b> if \(z\) satisfies a monic polynomial equation with integer coefficients.</p>
+<p>(c) The set of algebraic integers is denoted \(\mathbb{A}\).</p>
+</div>
+
+<p>From Part A Rings and Modules, we know that the set of algebraic numbers is the union of all subfields of \(\mathbb{C}\) of finite dimension as a \(\mathbb{Q}\)-vector space.</p>
+
+<div class="env example" id="ex-7.2">
+<div class="env-head">Examples 7.2.</div>
+<p>(a) Every integer \(a \in \mathbb{Z}\) is an algebraic integer, being a root of \(t - a = 0\).</p>
+<p>(b) Every root of unity is an algebraic integer.</p>
+<p>(c) If \(z\) is an algebraic number, then \(mz\) is an algebraic integer for some integer \(m\).</p>
+<p>(d) A rational number \(\alpha \in \mathbb{Q}\) is an algebraic integer if and only if \(\alpha \in \mathbb{Z}\). To see this, write \(\alpha = r/s\) with \(r, s\) coprime integers and suppose that \(\left(\frac{r}{s}\right)^n + a_{n-1}\left(\frac{r}{s}\right)^{n-1} + \cdots + a_1 \frac{r}{s} + a_0 = 0\) for some \(a_0, \ldots, a_{n-1} \in \mathbb{Z}\). Clearing denominators: \(r^n + a_{n-1}r^{n-1}s + \cdots + a_1 r s^{n-1} + a_0 s^n = 0\) and therefore \(s\) divides \(r^n\). Since \(s\) and \(r\) are coprime, \(s = \pm 1\) and \(\alpha \in \mathbb{Z}\).</p>
+</div>
+
+<p>We have the following remarkable and fundamental fact.</p>
+
+<div class="env theorem" id="thm-7.3">
+<div class="env-head">Theorem 7.3.</div>
+Algebraic integers form a subring of \(\mathbb{C}\).
+</div>
+
+<p>The heart of the proof of <a class="ref" data-ref="thm-7.3">Theorem 7.3</a> is the following useful</p>
+
+<div class="env proposition" id="prop-7.4">
+<div class="env-head">Proposition 7.4.</div>
+Let \(M\) be a finitely generated subgroup of \((\mathbb{C}, +)\). Then \[\{z \in \mathbb{C} : zM \subseteq M\} \subset \mathbb{A}.\]
+</div>
+
+<div class="proof" id="proof-7.4">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Suppose \(zM \subseteq M\). Choose a generating set \(\{v_1, \ldots, v_d\}\) for \(M\) and write \(z v_i = \sum_{j=1}^d u_{ij} v_j\) for all \(i = 1, \ldots, d\) for some integers \(u_{ij} \in \mathbb{Z}\). Consider the characteristic polynomial \(g(t) := \det(tI - U)\) of the \(d \times d\) matrix \(U = (u_{ij})\). Since all entries of \(U\) are integers, \(g(t)\) is a monic polynomial with integer coefficients. We can rewrite the equation as a matrix equation \(Uv = zv\) where \(v = (v_1, \ldots, v_d)^T\). Hence \(z\) is an eigenvalue of \(U\), so \(g(z) = 0\) and \(z\) is an algebraic integer.
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="proof" id="proof-7.3">
+<div class="proof-head">Proof of <a class="ref" data-ref="thm-7.3">Theorem 7.3</a>.</div>
+<div class="proof-body">
+Let \(\alpha, \beta \in \mathbb{A}\). Choose monic polynomial equations with integer coefficients satisfied by \(\alpha\) and \(\beta\), and consider the abelian subgroup \(M\) of \(\mathbb{C}\) generated by \(\{\alpha^i \beta^j : 0 \leqslant i < m,\, 0 \leqslant j < n\}\). The monic polynomial equations ensure that \(\alpha M \subseteq M\) and \(\beta M \subseteq M\). Hence \((\alpha\beta)M \subseteq M\) and \((\alpha + \beta)M \subseteq M\). So \(\alpha\beta\) and \(\alpha + \beta \in \mathbb{A}\) by <a class="ref" data-ref="prop-7.4">Proposition 7.4</a>.
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>Next we return to representation theory and extract some algebraic integers from the complex group ring of a finite group.</p>
+
+<div class="env lemma" id="lem-7.5">
+<div class="env-head">Lemma 7.5.</div>
+Let \(\chi\) be a character of the finite group \(G\). Then \(\chi(g)\) is an algebraic integer for all \(g \in G\).
+</div>
+
+<div class="proof" id="proof-7.5">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+We know that \(\chi(g)\) is a sum of \(n\)-th roots of unity where \(n\) is the order of \(g\). Since these are all algebraic integers, we can now apply <a class="ref" data-ref="thm-7.3">Theorem 7.3</a>.
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>Recall the conjugacy class sums from <a class="ref" data-ref="prop-3.12">Proposition 3.12</a>.</p>
+
+<div class="env lemma" id="lem-7.6">
+<div class="env-head">Lemma 7.6.</div>
+Let \(G\) be a finite group and let \(C_1, \ldots, C_r\) be the conjugacy classes in \(G\). Let \(S\) be the additive subgroup of \(\mathbb{C}G\) generated by the conjugacy class sums \(\hat{c}_{C_1}, \ldots, \hat{c}_{C_r}\). Then \(S\) is a subring of \(Z(\mathbb{C}G)\).
+</div>
+
+<div class="proof" id="proof-7.6">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Each \(\hat{c}_{C_i}\) is central in \(\mathbb{C}G\) by <a class="ref" data-ref="prop-3.12">Proposition 3.12</a>, so it suffices to show that \(S\) is stable under multiplication. Write \(\hat{c}_{C_i} \hat{c}_{C_j} = \sum_{k=1}^r a_{ijk}\, \hat{c}_{C_k}\) where \(a_{ijk} = |\{(x,y) \in C_i \times C_j : xy = z\}|\) for any \(z \in C_k\). This count does not depend on the choice of \(z \in C_k\), and \(a_{ijk} \in \mathbb{N}\). Hence \(\hat{c}_{C_i} \hat{c}_{C_j} \in S\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>We will now compute the value of the central characters of simple \(\mathbb{C}G\)-modules on our conjugacy class sums. These values turn out to be algebraic integers!</p>
+
+<div class="env theorem" id="thm-7.7">
+<div class="env-head">Theorem 7.7.</div>
+Let \(V\) be a simple \(\mathbb{C}G\)-module and let \(g \in G\).
+<p>(a) The conjugacy class sum \(\hat{c}_{g^G}\) acts on \(V\) by the scalar \(\frac{|g^G|\,\chi_V(g)}{\chi_V(1)} \in \mathbb{C}\): \[\hat{c}_{g^G} \cdot v = \frac{|g^G|\,\chi_V(g)}{\chi_V(1)} \cdot v \quad \text{for all } v \in V.\]</p>
+<p>(b) This scalar is an algebraic integer.</p>
+</div>
+
+<div class="proof" id="proof-7.7">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+<p>(a) Since \(V\) is simple and \(z := \hat{c}_{g^G}\) is central in \(\mathbb{C}G\), it acts by a scalar \(z_V \in \mathbb{C}\) on \(V\) by <a class="ref" data-ref="thm-3.4">Schur's Lemma, Theorem 3.4</a>. Taking the trace: \(z_V \dim V = |g^G|\,\chi_V(g)\). Part (a) follows since \(\dim V = \chi_V(1)\) by <a class="ref" data-ref="lem-5.5">Lemma 5.5(a)</a>.</p>
+<p>(b) Let \(\rho : G \to \GL(V)\) be the representation. Then \(\rho\) extends to a \(\mathbb{C}\)-algebra homomorphism \(\tilde{\rho} : \mathbb{C}G \to \End(V)\). The restriction to \(Z(\mathbb{C}G)\) gives the central character, so \(\tilde{\rho}(S)\) is a finitely generated abelian subgroup of \(\mathbb{C}\) which is also a subring (since \(S\) is a subring by <a class="ref" data-ref="lem-7.6">Lemma 7.6</a>). Hence \(z_V \cdot \tilde{\rho}(S) \subseteq \tilde{\rho}(S)\). <a class="ref" data-ref="prop-7.4">Proposition 7.4</a> tells us that \(z_V\) is an algebraic integer.</p>
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="env corollary" id="cor-7.8">
+<div class="env-head">Corollary 7.8.</div>
+If \(V\) is a simple \(\mathbb{C}G\)-module, then \(\dim V\) divides \(|G|\).
+</div>
+
+<div class="proof" id="proof-7.8">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+By <a class="ref" data-ref="thm-5.13">Theorem 5.13</a>, \(\langle \chi_V, \chi_V \rangle = 1\). Using <a class="ref" data-ref="prop-5.21">Proposition 5.21(a)</a>, we rewrite: \[\sum_{i=1}^r \chi_V(g_i^{-1}) \cdot \frac{|g_i^G|\,\chi_V(g_i)}{\chi_V(1)} = \frac{|G|}{\chi_V(1)}.\] Now \(\chi_V(g_i^{-1})\) is an algebraic integer by <a class="ref" data-ref="lem-7.5">Lemma 7.5</a>, and the other factor is an algebraic integer by <a class="ref" data-ref="thm-7.7">Theorem 7.7(b)</a>. Therefore \(|G|/\chi_V(1)\) is an algebraic integer by <a class="ref" data-ref="thm-7.3">Theorem 7.3</a>. Since it is also a rational number, it must be an integer by <a class="ref" data-ref="ex-7.2">Example 7.2(d)</a>.
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>We will now apply our knowledge to obtain an interesting group-theoretic application of representation theory.</p>
+
+<div class="env theorem" id="thm-7.9">
+<div class="env-head">Theorem 7.9 <span class="env-name">(Burnside, 1904)</span>.</div>
+Let \(G\) be a non-abelian group of order \(p^\alpha q^\beta\) where \(p, q\) are primes. Then \(G\) is not a simple group.
+</div>
+
+<p>We begin the proof by recalling Sylow theory from Part A Group Theory.</p>
+
+<div class="env definition" id="def-7.10">
+<div class="env-head">Definition 7.10.</div>
+Let \(G\) be a finite group and let \(p\) be a prime. Write \(|G| = p^\alpha m\) where \(p \nmid m\). A <b>Sylow \(p\)-subgroup</b> of \(G\) is a subgroup \(P\) of \(G\) of order \(p^\alpha\).
+</div>
+
+<div class="env theorem" id="thm-7.11">
+<div class="env-head">Theorem 7.11 <span class="env-name">(Sylow, 1874)</span>.</div>
+Let \(G\) be a finite group.
+<p>(a) \(G\) contains at least one Sylow \(p\)-subgroup.</p>
+<p>(b) Any two Sylow \(p\)-subgroups are conjugate in \(G\).</p>
+<p>(c) The number of Sylow \(p\)-subgroups is congruent to \(1 \pmod{p}\), and this number divides \(m = |G|/p^\alpha\).</p>
+</div>
+
+<div class="env lemma" id="lem-7.12">
+<div class="env-head">Lemma 7.12.</div>
+Let \(G\) be a group of order \(p^\alpha q^\beta\) where \(p, q\) are distinct primes and \(\alpha, \beta \geq 1\). Let \(g\) be a central element of a Sylow \(p\)-subgroup \(P\) of \(G\). Then \(|g^G|\) is a power of \(q\).
+</div>
+
+<div class="proof" id="proof-7.12">
+<div class="proof-head">Proof.</div>
+<div class="proof-body">
+Since \(P\) centralises \(g\), we have \(P \leqslant C_G(g)\). So \([G : C_G(g)]\) divides \(|G|/|P| = q^\beta\). But this index equals \(|g^G|\) by <a class="ref" data-ref="lem-5.17">Lemma 5.17</a>.
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>We will actually prove the following general result about finite simple groups.</p>
+
+<div class="env theorem" id="thm-7.13">
+<div class="env-head">Theorem 7.13.</div>
+Let \(G\) be a finite group and suppose that the size of a conjugacy class of a non-central element \(g \in G\) is a power of a prime \(q\). Then \(G\) is not a simple group.
+</div>
+
+<p>The proof of this statement requires a little Galois Theory.</p>
+
+<div class="env lemma" id="lem-7.14">
+<div class="env-head">Lemma 7.14.</div>
+Let \(\zeta_1, \ldots, \zeta_n\) be roots of unity and let \(\alpha := \frac{\zeta_1 + \cdots + \zeta_n}{n}\). Suppose also that \(\alpha\) is an algebraic integer. Then either \(\alpha = 0\), or \(\alpha = \zeta_1 = \cdots = \zeta_n\).
+</div>
+
+<div class="proof" id="proof-7.14">
+<div class="proof-head">Proof (Non-examinable).</div>
+<div class="proof-body">
+We may assume that \(\zeta_1, \ldots, \zeta_n \in \mathbb{Q}(\omega)\) for some primitive \(k\)-th root of unity \(\omega\). Let \(\mathcal{G}\) be the Galois group of \(\mathbb{Q}(\omega)\) over \(\mathbb{Q}\), and consider the norm \(a := \Norm_{\mathbb{Q}(\omega)/\mathbb{Q}}(\alpha) := \prod_{\sigma \in \mathcal{G}} \sigma(\alpha)\). Since each \(|\sigma(\zeta_j)| = 1\), we have \(|\sigma(\alpha)| \leqslant 1\) for each \(\sigma\), so \(|a| \leqslant 1\). On the other hand, \(a \in \mathbb{Q}\) by Galois theory, and \(a\) is an algebraic integer by <a class="ref" data-ref="thm-7.3">Theorem 7.3</a>. Hence \(a \in \mathbb{Z}\) by <a class="ref" data-ref="ex-7.2">Example 7.2(d)</a>. These two facts force \(a \in \{-1, 0, 1\}\). If \(\alpha \neq 0\) then \(|a| = 1\), so \(|\zeta_1 + \cdots + \zeta_n| = n\), which forces \(\alpha = \zeta_1 = \cdots = \zeta_n\).
+</div>
+<div class="qed">□</div>
+</div>
+
+<div class="proof" id="proof-7.13">
+<div class="proof-head">Proof of <a class="ref" data-ref="thm-7.13">Theorem 7.13</a>.</div>
+<div class="proof-body">
+<p>The idea is to examine all non-trivial irreducible representations \(\rho_2, \ldots, \rho_r\) of \(G\) and show that for at least one, \(\rho_i(g)\) is a scalar multiple of the identity. Once done, consider the normal subgroups \(\ker \rho_i \leqslant \rho_i^{-1}(\mathbb{C}^\times)\). Since \(\ker \rho_i\) is proper (as \(\rho_i\) is non-trivial) and \(\rho_i^{-1}(\mathbb{C}^\times)\) is non-trivial, the only way \(G\) could be simple is if \(\rho_i(G) \leqslant \mathbb{C}^\times\), making \(G\) abelian — contradicting \(g\) being non-central.</p>
+<p>Consider the Column Orthogonality relation (<a class="ref" data-ref="thm-5.23">Theorem 5.23</a>) for the pair \(1\) and \(g\): \(1 + \sum_{i=2}^r \chi_i(1)\,\chi_i(g) = 0\). If all degrees \(\chi_i(1)\) were divisible by \(q\), then \(-1/q \in \mathbb{A}\), contradicting <a class="ref" data-ref="ex-7.2">Example 7.2(d)</a>. So \(\chi_i(g) \neq 0\) and \(q \nmid \chi_i(1)\) for at least one \(i\).</p>
+<p>Since \(|g^G|\) is a power of \(q\), \(\chi_i(1)\) is coprime to \(|g^G|\). By Bézout's Lemma, \(a|g^G| + b\chi_i(1) = 1\) for some integers \(a, b\). Hence \(a\frac{|g^G|\chi_i(g)}{\chi_i(1)} + b\chi_i(g) = \frac{\chi_i(g)}{\chi_i(1)}\). Now \(\frac{|g^G|\chi_i(g)}{\chi_i(1)} \in \mathbb{A}\) by <a class="ref" data-ref="thm-7.7">Theorem 7.7(b)</a> and \(\chi_i(g) \in \mathbb{A}\) by <a class="ref" data-ref="lem-7.5">Lemma 7.5</a>, so \(\frac{\chi_i(g)}{\chi_i(1)} \in \mathbb{A}\) by <a class="ref" data-ref="thm-7.3">Theorem 7.3</a>. Since it is nonzero, <a class="ref" data-ref="lem-7.14">Lemma 7.14</a> tells us that the eigenvalues of \(\rho_i(g)\) are all equal to some root of unity \(\zeta\). Then \(\rho_i(g) = \zeta \cdot 1_{V_i}\) is a scalar multiple of the identity as claimed.</p>
+</div>
+<div class="qed">□</div>
+</div>
+
+<p>The proof of Burnside's Theorem is now a formality.</p>
+
+<div class="proof" id="proof-7.9">
+<div class="proof-head">Proof of <a class="ref" data-ref="thm-7.9">Theorem 7.9</a>.</div>
+<div class="proof-body">
+We may assume \(\alpha, \beta \geq 1\). By <a class="ref" data-ref="thm-7.11">Sylow's Theorem, Theorem 7.11(a)</a>, \(G\) has a Sylow \(p\)-subgroup \(P\). Since \(P\) is a non-trivial \(p\)-group (as \(\alpha \geq 1\)), it must have a non-trivial central element \(g \in Z(P)\). If this element is also central in \(G\) then \(\langle g \rangle\) will be a non-trivial proper normal subgroup of \(G\) (as \(\beta \geq 1\)) and we're done. Otherwise, \(g\) is not central in \(G\) and <a class="ref" data-ref="lem-7.12">Lemma 7.12</a> tells us that \(|g^G|\) is a power of \(q\). Now apply <a class="ref" data-ref="thm-7.13">Theorem 7.13</a>.
+</div>
+<div class="qed">□</div>
+</div>
+
+</main>
+
+<!-- Right Context Panel -->
+<aside id="ref-panel">
+<div id="resize-handle"></div>
+<div class="panel-empty">Click any heading or cross-reference to explore dependencies.</div>
+<div id="panel-nav" style="display:none;">
+  <button id="nav-back" disabled title="Back">&#9664;</button>
+  <button id="nav-forward" disabled title="Forward">&#9654;</button>
+  <span class="nav-label" id="nav-label"></span>
+  <button class="btn-map" id="btn-map" title="Toggle overview map">Map</button>
+  <button class="btn-close-panel" id="btn-close-panel" title="Close panel">&times;</button>
+</div>
+<div id="minimap-container"></div>
+<div id="graph-container" style="display:none;"></div>
+<div id="panel-content" style="display:none;"></div>
+</aside>
+
+<!-- Floating peek popover (positioned near hovered reference) -->
+<div id="peek-popover">
+  <div id="peek-popover-header"><span id="peek-label"></span><button id="peek-close" title="Close">&times;</button></div>
+  <div id="peek-popover-body"></div>
+</div>
+
+
+<!-- JavaScript -->
+<script>
+var graph = {}, labelMap = {};
+var navHistory = [], navIndex = -1, currentPanelId = null;
+var peekTimeout = null, minimapBuilt = false, currentScrollId = null;
+var MAX_DEPTH = 2, MAX_PER_COL = 8;
+
+var TYPE_COLORS = {
+  definition:'#93c5fd', theorem:'#fca5a5', lemma:'#86efac', proposition:'#d8b4fe',
+  corollary:'#fdba74', example:'#d1d5db', remark:'#e5e7eb', notation:'#e5e7eb', warning:'#fde68a'
+};
+
+function getType(id) {
+  if (id.indexOf('def-')===0) return 'definition';
+  if (id.indexOf('thm-')===0) return 'theorem';
+  if (id.indexOf('lem-')===0) return 'lemma';
+  if (id.indexOf('prop-')===0) return 'proposition';
+  if (id.indexOf('cor-')===0) return 'corollary';
+  if (id.indexOf('ex-')===0) return 'example';
+  if (id.indexOf('rmk-')===0) return 'remark';
+  if (id.indexOf('not-')===0) return 'notation';
+  if (id.indexOf('warn-')===0) return 'warning';
+  return 'example';
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function buildGraph() {
+  document.querySelectorAll('.env[id]').forEach(function(env) {
+    var id = env.id, head = env.querySelector('.env-head');
+    if (head) labelMap[id] = head.textContent.trim().replace(/\.\s*$/, '');
+    var refs = [], seen = {};
+    function collect(el) { el.querySelectorAll('a.ref').forEach(function(a) { if (a.dataset.ref) refs.push(a.dataset.ref); }); }
+    collect(env);
+    var next = env.nextElementSibling;
+    if (next && next.classList.contains('proof')) collect(next);
+    var unique = [];
+    refs.forEach(function(r) { if (r !== id && !seen[r]) { seen[r] = true; unique.push(r); } });
+    graph[id] = { uses: unique, usedBy: [] };
+  });
+  Object.keys(graph).forEach(function(id) {
+    graph[id].uses.forEach(function(ref) { if (graph[ref]) graph[ref].usedBy.push(id); });
+  });
+}
+
+function shortLabel(id) {
+  if (!labelMap[id]) return id;
+  return labelMap[id].replace(/^Definition\s/,'Def ').replace(/^Theorem\s/,'Thm ')
+    .replace(/^Lemma\s/,'Lem ').replace(/^Proposition\s/,'Prop ').replace(/^Corollary\s/,'Cor ')
+    .replace(/^Examples?\s/,'Ex ').replace(/^Remarks?\s/,'Rmk ').replace(/^Notation\s/,'Not ').replace(/^Warning/,'Warn');
+}
+
+// ── BFS multi-level collection ──
+function collectMultiLevel(centerId) {
+  var dL={}, uL={}, dE=[], uE=[];
+  function bfs(startId, edgeKey, levels, edges) {
+    var vis = {}; vis[startId] = true; var front = [startId];
+    for (var d = 0; d < MAX_DEPTH; d++) {
+      var nf = [];
+      for (var i = 0; i < front.length; i++) {
+        var neighbors = graph[front[i]] ? graph[front[i]][edgeKey] : [];
+        for (var j = 0; j < neighbors.length; j++) {
+          var nb = neighbors[j];
+          if (!graph[nb]) continue;
+          edges.push(edgeKey === 'uses' ? [nb, front[i]] : [front[i], nb]);
+          if (vis[nb]) continue;
+          vis[nb] = true;
+          if (!levels[d+1]) levels[d+1] = [];
+          levels[d+1].push(nb);
+          nf.push(nb);
+        }
+      }
+      front = nf;
+    }
+  }
+  bfs(centerId, 'uses', dL, dE);
+  bfs(centerId, 'usedBy', uL, uE);
+  return { depsLevels:dL, usedByLevels:uL, depsEdges:dE, usedByEdges:uE };
+}
+
+// ── Per-item dependency graph SVG ──
+function renderGraph(centerId) {
+  var ml = collectMultiLevel(centerId), dl = ml.depsLevels, ul = ml.usedByLevels;
+  var columns = [], maxDL = 0, maxUL = 0;
+  for (var k in dl) if (+k > maxDL) maxDL = +k;
+  for (var dd = maxDL; dd >= 1; dd--) { var it = (dl[dd]||[]).slice(0,MAX_PER_COL); if (it.length||dd===1) columns.push(it); }
+  var cci = columns.length;
+  columns.push([centerId]);
+  for (var k2 in ul) if (+k2 > maxUL) maxUL = +k2;
+  for (var uu = 1; uu <= maxUL; uu++) { var it2 = (ul[uu]||[]).slice(0,MAX_PER_COL); if (it2.length||uu===maxUL) columns.push(it2); }
+  var filt=[], nc=0;
+  for (var ci=0; ci<columns.length; ci++) { if (columns[ci].length||ci===cci) { if (ci===cci) nc=filt.length; filt.push(columns[ci]); } }
+  columns=filt; cci=nc;
+  var nW=72, nH=24, pX=12, pY=8, gp=36, numC=columns.length;
+  if (numC<=3){nW=85;gp=44;} else if(numC>=5){nW=62;gp=24;}
+  var mx=1; columns.forEach(function(c){if(c.length>mx)mx=c.length;});
+  var tW=numC*nW+(numC-1)*gp+pX*2, tH=Math.max(mx*(nH+pY)-pY+40,70);
+  var np={};
+  for(var c=0;c<columns.length;c++){var col=columns[c],cx=pX+c*(nW+gp)+nW/2,bH=col.length*(nH+pY)-pY,sY=(tH-16)/2-bH/2;
+    for(var n=0;n<col.length;n++) np[col[n]]={x:cx,y:sY+n*(nH+pY)+nH/2};}
+  var s='<svg xmlns="http://www.w3.org/2000/svg" width="'+tW+'" height="'+tH+'">';
+  function edge(a,b){var p1=np[a],p2=np[b];if(!p1||!p2)return;var x1=p1.x+nW/2,y1=p1.y,x2=p2.x-nW/2,y2=p2.y,mx2=(x1+x2)/2;
+    s+='<path d="M'+x1+','+y1+' C'+mx2+','+y1+' '+mx2+','+y2+' '+x2+','+y2+'" fill="none" stroke="#c4c8cf" stroke-width="1.2"/>';
+    s+='<polygon points="'+x2+','+y2+' '+(x2-5)+','+(y2-3)+' '+(x2-5)+','+(y2+3)+'" fill="#c4c8cf"/>';}
+  ml.depsEdges.forEach(function(e){edge(e[0],e[1]);}); ml.usedByEdges.forEach(function(e){edge(e[0],e[1]);});
+  for(var id in np){var p=np[id],cur=id===centerId;
+    s+='<g class="graph-node" data-id="'+id+'"><rect x="'+(p.x-nW/2)+'" y="'+(p.y-nH/2)+'" width="'+nW+'" height="'+nH+'" rx="4" fill="'+(cur?'#dbeafe':'#f8f9fa')+'" stroke="'+(cur?'#1e40af':'#d1d5db')+'" stroke-width="'+(cur?2:1)+'"/>';
+    s+='<text x="'+p.x+'" y="'+(p.y+4)+'" text-anchor="middle" fill="#111" font-weight="'+(cur?'bold':'normal')+'">'+esc(shortLabel(id))+'</text></g>';}
+  for(var li=0;li<columns.length;li++){var lbl=li<cci?(cci-li===1?'deps':'depth '+(cci-li)):li===cci?'current':(li-cci===1?'used by':'depth '+(li-cci));
+    s+='<text class="graph-label" x="'+(pX+li*(nW+gp)+nW/2)+'" y="'+(tH-3)+'" text-anchor="middle" fill="#9ca3af" font-size="8.5" font-style="italic">'+lbl+'</text>';}
+  s+='</svg>'; return s;
+}
+
+// ── Navigation ──
+function navigateTo(id, addHist) {
+  if (!graph[id]) return;
+  if (addHist !== false) { navHistory = navHistory.slice(0, navIndex+1); navHistory.push(id); navIndex = navHistory.length-1; }
+  currentPanelId = id;
+  showPanel(); updatePanel(id); updateNavButtons(); updateMinimapActive(id);
+}
+function navBack() { if(navIndex>0){navIndex--;currentPanelId=navHistory[navIndex];updatePanel(currentPanelId);updateNavButtons();scrollToEnv(currentPanelId);updateMinimapActive(currentPanelId);} }
+function navForward() { if(navIndex<navHistory.length-1){navIndex++;currentPanelId=navHistory[navIndex];updatePanel(currentPanelId);updateNavButtons();scrollToEnv(currentPanelId);updateMinimapActive(currentPanelId);} }
+function updateNavButtons() {
+  var b=document.getElementById('nav-back'),f=document.getElementById('nav-forward'),l=document.getElementById('nav-label');
+  if(b)b.disabled=(navIndex<=0); if(f)f.disabled=(navIndex>=navHistory.length-1); if(l)l.textContent=shortLabel(currentPanelId);
+}
+function scrollToEnv(id) { var el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+
+function showPanel() {
+  var p=document.getElementById('ref-panel'); p.style.display='';
+  document.body.style.setProperty('--panel-width', (parseInt(getComputedStyle(document.body).getPropertyValue('--panel-width'))||450)+'px');
+}
+function hidePanel() {
+  document.getElementById('ref-panel').style.display='none';
+  document.body.style.setProperty('--panel-width','0px');
+}
+
+// ── Panel content (collapsible items) ──
+function updatePanel(id) {
+  var nav=document.getElementById('panel-nav'), gC=document.getElementById('graph-container'),
+      cC=document.getElementById('panel-content'), em=document.querySelector('#ref-panel .panel-empty');
+  if(em)em.style.display='none'; nav.style.display='flex'; gC.style.display='block'; cC.style.display='block';
+  gC.innerHTML = renderGraph(id);
+  gC.querySelectorAll('.graph-node').forEach(function(n){n.addEventListener('click',function(){var nid=n.getAttribute('data-id');if(nid){navigateTo(nid);scrollToEnv(nid);}});});
+
+  var ml=collectMultiLevel(id), html='';
+  function renderSection(label, items) {
+    html+='<div class="panel-section"><div class="panel-section-label"><span>'+label+' ('+items.length+')</span>';
+    if(items.length>0) html+='<span class="panel-section-controls"><button data-action="expand-all">expand all</button><button data-action="collapse-all">collapse all</button></span>';
+    html+='</div>';
+    if(items.length===0) { html+='<div class="panel-section-empty">None.</div>'; }
+    else { items.forEach(function(itemId){ var env=document.getElementById(itemId); if(!env)return;
+      html+='<div class="stacked-item" data-item-id="'+itemId+'"><div class="stacked-header" data-id="'+itemId+'"><span class="toggle-icon">&#9656;</span>'+esc(labelMap[itemId]||itemId)+'</div>';
+      html+='<div class="stacked-body">'+env.outerHTML+'</div></div>'; }); }
+    html+='</div>';
+  }
+  var allDeps=[], allUB=[];
+  var maxDL=0; for(var k in ml.depsLevels) if(+k>maxDL) maxDL=+k;
+  for(var dd=maxDL;dd>=1;dd--)(ml.depsLevels[dd]||[]).forEach(function(x){allDeps.push(x);});
+  var maxUL=0; for(var k2 in ml.usedByLevels) if(+k2>maxUL) maxUL=+k2;
+  for(var uu=1;uu<=maxUL;uu++)(ml.usedByLevels[uu]||[]).forEach(function(x){allUB.push(x);});
+  renderSection('Prerequisites', allDeps);
+  renderSection('Referenced by', allUB);
+  cC.innerHTML = html;
+
+  // Wire up collapsible items
+  cC.querySelectorAll('.stacked-header').forEach(function(hdr){
+    hdr.addEventListener('click', function(e){ e.stopPropagation();
+      var item=hdr.closest('.stacked-item'); if(!item)return; item.classList.toggle('expanded');
+      if(item.classList.contains('expanded')&&!item.dataset.typeset){ item.dataset.typeset='1';
+        var body=item.querySelector('.stacked-body'); if(body&&typeof MathJax!=='undefined'&&MathJax.typesetPromise) MathJax.typesetPromise([body]).catch(function(){}); }
+    });
+    hdr.addEventListener('dblclick', function(){var hid=hdr.getAttribute('data-id');if(hid){navigateTo(hid);scrollToEnv(hid);}});
+  });
+  cC.querySelectorAll('.panel-section-controls button').forEach(function(btn){
+    btn.addEventListener('click',function(e){e.stopPropagation();var sec=btn.closest('.panel-section'),act=btn.getAttribute('data-action');
+      sec.querySelectorAll('.stacked-item').forEach(function(item){
+        if(act==='expand-all'){item.classList.add('expanded');if(!item.dataset.typeset){item.dataset.typeset='1';var b=item.querySelector('.stacked-body');if(b&&typeof MathJax!=='undefined'&&MathJax.typesetPromise)MathJax.typesetPromise([b]).catch(function(){});}}
+        else item.classList.remove('expanded');});});
+  });
+  cC.querySelectorAll('a.ref').forEach(function(ref){
+    ref.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();var tid=ref.getAttribute('data-ref');if(tid){if(graph[tid])navigateTo(tid);scrollToEnv(tid);}});
+  });
+  document.querySelectorAll('.env.panel-active').forEach(function(el){el.classList.remove('panel-active');});
+  var ae=document.getElementById(id); if(ae) ae.classList.add('panel-active');
+}
+
+// ── Floating peek popover ──
+function showPeek(refId, anchor) {
+  var pop=document.getElementById('peek-popover'), lbl=document.getElementById('peek-label'),
+      body=document.getElementById('peek-popover-body'), env=document.getElementById(refId);
+  if(!env||!pop) return;
+  clearTimeout(peekTimeout);
+  lbl.textContent = labelMap[refId]||refId;
+  body.innerHTML = env.outerHTML;
+  pop.classList.add('visible');
+  var r=anchor.getBoundingClientRect(), pW=380, pH=420, wW=window.innerWidth, wH=window.innerHeight;
+  var left=r.right+12, top=r.top-20;
+  if(left+pW>wW-20) left=r.left-pW-12;
+  if(left<10) left=Math.max(10,(r.left+r.right)/2-pW/2);
+  if(top+pH>wH-10) top=wH-pH-10; if(top<10) top=10;
+  pop.style.left=left+'px'; pop.style.top=top+'px';
+  if(typeof MathJax!=='undefined'&&MathJax.typesetPromise) MathJax.typesetPromise([body]).catch(function(){});
+}
+function hidePeek() { clearTimeout(peekTimeout); peekTimeout=setTimeout(function(){document.getElementById('peek-popover').classList.remove('visible');},400); }
+
+function initPeek() {
+  var pop=document.getElementById('peek-popover');
+  pop.addEventListener('mouseenter',function(){clearTimeout(peekTimeout);});
+  pop.addEventListener('mouseleave', hidePeek);
+  document.getElementById('peek-close').addEventListener('click',function(){clearTimeout(peekTimeout);pop.classList.remove('visible');});
+  document.getElementById('content').addEventListener('mouseover',function(e){var ref=e.target.closest('a.ref');if(ref&&ref.dataset.ref)showPeek(ref.dataset.ref,ref);});
+  document.getElementById('content').addEventListener('mouseout',function(e){if(e.target.closest('a.ref'))hidePeek();});
+}
+
+// ── Resize handles ──
+function initResize() {
+  function makeDrag(handle, getWidth, setWidth) {
+    var dragging=false;
+    handle.addEventListener('mousedown',function(e){e.preventDefault();dragging=true;handle.classList.add('dragging');document.body.style.cursor='col-resize';document.body.style.userSelect='none';});
+    document.addEventListener('mousemove',function(e){if(!dragging)return;setWidth(e);});
+    document.addEventListener('mouseup',function(){if(dragging){dragging=false;handle.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';}});
+  }
+  makeDrag(document.getElementById('resize-handle'), null, function(e){
+    var w=window.innerWidth-e.clientX; w=Math.max(200,Math.min(w,window.innerWidth-400));
+    document.body.style.setProperty('--panel-width',w+'px');
+  });
+  makeDrag(document.getElementById('sidebar-resize'), null, function(e){
+    var w=e.clientX; w=Math.max(120,Math.min(w,400));
+    document.body.style.setProperty('--sidebar-width',w+'px');
+  });
+}
+
+// ── Minimap (overview graph) ──
+var minimapPos = {};
+
+function renderMinimap() {
+  var container = document.getElementById('minimap-container');
+  var sections = [], secMap = {};
+  document.querySelectorAll('h2.section-heading[id]').forEach(function(h) {
+    var lbl = h.textContent.trim();
+    if (lbl.length > 22) lbl = lbl.substring(0,20) + '\u2026';
+    secMap[h.id] = { id: h.id, label: lbl, items: [] };
+    sections.push(secMap[h.id]);
+  });
+  var curSec = null;
+  document.querySelectorAll('.env[id], h2.section-heading[id]').forEach(function(el) {
+    if (el.tagName === 'H2') curSec = secMap[el.id];
+    else if (curSec && graph[el.id]) curSec.items.push(el.id);
+  });
+
+  var cW=14, cH=14, gap=2, rowGap=6, lblW=95, pad=4;
+  var maxItems=0; sections.forEach(function(s){if(s.items.length>maxItems) maxItems=s.items.length;});
+  var tW = lblW + maxItems*(cW+gap) + pad*2;
+  var tH = sections.length*(cH+rowGap) - rowGap + pad*2;
+  minimapPos = {};
+
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+tW+'" height="'+tH+'" id="minimap-svg">';
+  // No edge lines - highlighting uses colored glows instead
+
+  for (var si=0; si<sections.length; si++) {
+    var sec=sections[si], ry=pad+si*(cH+rowGap);
+    svg += '<text x="'+pad+'" y="'+(ry+cH-3)+'" font-size="8.5" fill="#6b7280" font-weight="600" font-family="Computer Modern Sans,sans-serif">'+esc(sec.label)+'</text>';
+    for (var ii=0; ii<sec.items.length; ii++) {
+      var itemId=sec.items[ii], cx=lblW+ii*(cW+gap), color=TYPE_COLORS[getType(itemId)]||'#e5e7eb';
+      minimapPos[itemId] = {x:cx, y:ry, cx:cx+cW/2, cy:ry+cH/2};
+      svg += '<g class="minimap-node" data-id="'+itemId+'"><rect x="'+cx+'" y="'+ry+'" width="'+cW+'" height="'+cH+'" rx="2" fill="'+color+'"/></g>';
+    }
+  }
+  svg += '</svg>';
+
+  // Legend
+  var legend = '<div class="minimap-legend">';
+  var types = [['Def','definition'],['Thm','theorem'],['Lem','lemma'],['Prop','proposition'],['Cor','corollary'],['Ex','example'],['Rmk','remark']];
+  types.forEach(function(t) {
+    legend += '<span style="display:inline-flex;align-items:center;gap:2px"><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:'+TYPE_COLORS[t[1]]+'"></span>'+t[0]+'</span>';
+  });
+  legend += '</div>';
+
+  container.innerHTML = svg + legend;
+  minimapBuilt = true;
+
+  // Interactions — hover shows label in nav bar instead of cluttering tooltip
+  var svgEl = document.getElementById('minimap-svg');
+  var navLabel = document.getElementById('nav-label');
+  svgEl.querySelectorAll('.minimap-node').forEach(function(node) {
+    node.addEventListener('mouseenter', function() {
+      var id = node.getAttribute('data-id');
+      if (navLabel) { navLabel.textContent = shortLabel(id); navLabel.classList.add('minimap-hover'); }
+      highlightMinimapDeps(id);
+    });
+    node.addEventListener('mouseleave', function() {
+      if (navLabel) { navLabel.textContent = currentPanelId ? shortLabel(currentPanelId) : ''; navLabel.classList.remove('minimap-hover'); }
+      clearMinimapHighlights();
+    });
+    node.addEventListener('click', function() {
+      var id = node.getAttribute('data-id');
+      if (id) { navigateTo(id); scrollToEnv(id); }
+    });
+  });
+
+  // Apply current scroll highlight
+  if (currentScrollId) updateMinimapScroll(currentScrollId);
+}
+
+function highlightMinimapDeps(centerId) {
+  var deps = graph[centerId] ? graph[centerId].uses : [];
+  var usedBy = graph[centerId] ? graph[centerId].usedBy : [];
+  var related = {}; related[centerId] = 'center';
+  deps.forEach(function(d){related[d]='dep';}); usedBy.forEach(function(u){related[u]='usedby';});
+
+  document.querySelectorAll('#minimap-svg .minimap-node').forEach(function(n) {
+    var nid = n.getAttribute('data-id');
+    n.classList.remove('active','dep-highlight','usedby-highlight','dimmed');
+    if (nid===centerId) n.classList.add('active');
+    else if (related[nid]==='dep') n.classList.add('dep-highlight');
+    else if (related[nid]==='usedby') n.classList.add('usedby-highlight');
+    else n.classList.add('dimmed');
+  });
+
+  // No edge arrows - colored glows on nodes are cleaner
+}
+
+function clearMinimapHighlights() {
+  document.querySelectorAll('#minimap-svg .minimap-node').forEach(function(n){n.classList.remove('active','dep-highlight','usedby-highlight','dimmed');});
+  // Reset highlights only
+  if (currentScrollId) updateMinimapScroll(currentScrollId);
+  if (currentPanelId) updateMinimapActive(currentPanelId);
+}
+
+function updateMinimapScroll(id) {
+  document.querySelectorAll('#minimap-svg .minimap-node.scroll-active').forEach(function(n){n.classList.remove('scroll-active');});
+  var node = document.querySelector('#minimap-svg .minimap-node[data-id="'+id+'"]');
+  if (node) node.classList.add('scroll-active');
+}
+
+function updateMinimapActive(id) {
+  document.querySelectorAll('#minimap-svg .minimap-node.panel-selected').forEach(function(n){n.classList.remove('panel-selected');});
+  var node = document.querySelector('#minimap-svg .minimap-node[data-id="'+id+'"]');
+  if (node) node.classList.add('panel-selected');
+}
+
+function toggleMinimap() {
+  var mc = document.getElementById('minimap-container'), btn = document.getElementById('btn-map');
+  if (mc.classList.contains('hidden')) {
+    mc.classList.remove('hidden'); btn.classList.add('active');
+  } else {
+    mc.classList.add('hidden'); btn.classList.remove('active');
+  }
+}
+
+// ── Glossary / Nomenclature ──
+var glossaryData = {}; // type → [{id, label}]
+var glossaryFilter = 'all';
+
+function buildGlossary() {
+  var types = ['definition','theorem','lemma','proposition','corollary','example','remark','notation'];
+  var typeLabels = {definition:'Def',theorem:'Thm',lemma:'Lem',proposition:'Prop',corollary:'Cor',example:'Ex',remark:'Rmk',notation:'Not'};
+  glossaryData = {all:[]};
+  types.forEach(function(t){glossaryData[t]=[];});
+
+  document.querySelectorAll('.env[id]').forEach(function(env) {
+    var id = env.id, type = getType(id);
+    var label = labelMap[id] || id;
+    var entry = {id:id, type:type, label:label, shortType:typeLabels[type]||type};
+    glossaryData.all.push(entry);
+    if (glossaryData[type]) glossaryData[type].push(entry);
+  });
+
+  // Build tabs
+  var tabsEl = document.getElementById('glossary-tabs');
+  var tabs = [{key:'all',label:'All ('+glossaryData.all.length+')'}];
+  types.forEach(function(t){
+    if(glossaryData[t].length>0) tabs.push({key:t,label:typeLabels[t]+' ('+glossaryData[t].length+')'});
+  });
+  var tabsHtml = '';
+  tabs.forEach(function(t){
+    tabsHtml += '<button class="glossary-tab'+(t.key==='all'?' active':'')+'" data-filter="'+t.key+'">'+t.label+'</button>';
+  });
+  tabsEl.innerHTML = tabsHtml;
+
+  // Tab click handlers
+  tabsEl.querySelectorAll('.glossary-tab').forEach(function(tab){
+    tab.addEventListener('click',function(){
+      tabsEl.querySelectorAll('.glossary-tab').forEach(function(t){t.classList.remove('active');});
+      tab.classList.add('active');
+      glossaryFilter = tab.getAttribute('data-filter');
+      renderGlossaryList();
+    });
+  });
+
+  renderGlossaryList();
+}
+
+function renderGlossaryList() {
+  var list = document.getElementById('glossary-list');
+  var items = glossaryData[glossaryFilter] || glossaryData.all;
+  var html = '';
+  items.forEach(function(entry) {
+    html += '<div class="glossary-item" data-id="'+entry.id+'" data-ref="'+entry.id+'">';
+    html += '<span class="g-type">'+esc(entry.shortType)+'</span>';
+    html += '<span class="g-label">'+esc(entry.label)+'</span>';
+    html += '</div>';
+  });
+  list.innerHTML = html;
+
+  // Click → scroll + navigate, Hover → peek
+  list.querySelectorAll('.glossary-item').forEach(function(item){
+    item.addEventListener('click',function(){
+      var id = item.getAttribute('data-id');
+      if(id){scrollToEnv(id); if(graph[id]) navigateTo(id);}
+    });
+    item.addEventListener('mouseenter',function(){
+      var id = item.getAttribute('data-id');
+      if(id) showPeek(id, item);
+    });
+    item.addEventListener('mouseleave',function(){ hidePeek(); });
+  });
+}
+
+// ── Event listeners ──
+document.addEventListener('click', function(e) {
+  var ph = e.target.closest('.proof-head');
+  if (ph) { e.stopPropagation(); ph.closest('.proof').classList.toggle('collapsed'); return; }
+  var eh = e.target.closest('.env-head');
+  if (eh && !eh.closest('#panel-content') && !eh.closest('#peek-popover')) {
+    var env = eh.closest('.env[id]'); if (env) navigateTo(env.id); return;
+  }
+  var ref = e.target.closest('a.ref');
+  if (ref && !ref.closest('#panel-content') && !ref.closest('#peek-popover')) {
+    e.preventDefault(); var tid=ref.getAttribute('data-ref'); if(!tid) return;
+    document.getElementById('peek-popover').classList.remove('visible');
+    if(graph[tid]) navigateTo(tid); scrollToEnv(tid);
+  }
+});
+
+// ── TOC ──
+function expandSection(sid) {
+  document.querySelectorAll('.toc-section-head').forEach(function(head) {
+    var items = head.nextElementSibling;
+    if (items && items.id === 'sidebar-resize') items = null;
+    if (items && !items.classList.contains('toc-items')) items = null;
+    if (head.getAttribute('data-section') === sid) { head.classList.add('expanded'); if(items) items.classList.add('visible'); }
+    else { head.classList.remove('expanded'); if(items) items.classList.remove('visible'); }
+  });
+}
+document.querySelectorAll('.toc-section-head').forEach(function(head) {
+  head.addEventListener('click', function() {
+    if (head.classList.contains('expanded')) { head.classList.remove('expanded'); var it=head.nextElementSibling; if(it&&it.classList.contains('toc-items')) it.classList.remove('visible'); }
+    else expandSection(head.getAttribute('data-section'));
+  });
+});
+document.querySelectorAll('.toc-items a').forEach(function(a) {
+  a.addEventListener('click', function(e) { e.preventDefault();
+    var tid=a.getAttribute('data-id'), t=document.getElementById(tid);
+    if(t){t.scrollIntoView({behavior:'smooth',block:'start'});if(graph[tid])navigateTo(tid);}
+  });
+});
+
+// ── Scroll observer (TOC + minimap tracking) ──
+function setupScrollObserver() {
+  var content = document.getElementById('content');
+  var secObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) { if(entry.isIntersecting) expandSection(entry.target.id); });
+  }, {root:content, rootMargin:'-10% 0px -80% 0px', threshold:0});
+  document.querySelectorAll('h2.section-heading[id]').forEach(function(h) { secObs.observe(h); });
+
+  document.querySelectorAll('.env[id]').forEach(function(env) {
+    new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        var tocLink = document.querySelector('.toc-items a[data-id="'+entry.target.id+'"]');
+        if (tocLink) { document.querySelectorAll('.toc-items a.active').forEach(function(a){a.classList.remove('active');}); tocLink.classList.add('active'); }
+        currentScrollId = entry.target.id;
+        if (minimapBuilt) updateMinimapScroll(currentScrollId);
+      });
+    }, {root:content, rootMargin:'-10% 0px -70% 0px', threshold:0}).observe(env);
+  });
+}
+
+// ── Init ──
+function initApp() {
+  buildGraph();
+  renderMinimap();
+  document.getElementById('btn-map').classList.add('active');
+  buildGlossary();
+  setupScrollObserver();
+  initResize();
+  initPeek();
+  expandSection('sec1');
+  document.getElementById('nav-back').addEventListener('click', navBack);
+  document.getElementById('nav-forward').addEventListener('click', navForward);
+  document.getElementById('btn-map').addEventListener('click', toggleMinimap);
+  document.getElementById('btn-close-panel').addEventListener('click', hidePanel);
+}
+
+if (typeof MathJax === 'undefined' || !MathJax.startup) {
+  document.addEventListener('DOMContentLoaded', function() { setTimeout(initApp, 2000); });
+}
+</script>
+</body>
+</html>
